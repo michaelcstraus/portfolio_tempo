@@ -22,7 +22,7 @@ export default function Home() {
               Michael Straus
             </span>
             <br />
-            <span className="text-white">Portfolioss</span>
+            <span className="text-white">Game Designer</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
