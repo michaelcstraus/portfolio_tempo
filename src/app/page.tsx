@@ -19,10 +19,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto text-center z-10 space-y-6">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-400">
-              Michael Straussasadfasdfasdfasdfa
+              Michael Straus
             </span>
             <br />
-            <span className="text-white">Portfolios</span>
+            <span className="text-white">Portfolioss</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
