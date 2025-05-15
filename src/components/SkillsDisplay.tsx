@@ -118,13 +118,13 @@ const SkillsDisplay = ({
   }, [skills]);
 
   return (
-    <div className="w-full py-12 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+    <div className="w-full bg-background">
+      <div className="container px-4 md:px-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
             Skills & Experience
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             My expertise spans game design, development, and creative direction
             with a focus on creating engaging player experiences.
           </p>
@@ -198,8 +198,12 @@ const SkillsDisplay = ({
                 <CardContent>
                   <p className="mb-4 text-sm">{exp.description}</p>
                   <div className="flex flex-wrap gap-2">
-                    {exp.skills.map((skill, i) => (
-                      <Badge key={i} variant="secondary">
+                    {exp.skills.map((skill, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="bg-secondary/50"
+                      >
                         {skill}
                       </Badge>
                     ))}
