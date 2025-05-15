@@ -49,27 +49,27 @@ export default function GameShowcase({
   games = [
     {
       id: "game1",
-      title: "Cosmic Defender",
+      title: "Times Machine Extra",
       description:
-        "A fast-paced space shooter where you defend Earth from alien invaders. Features multiple weapon upgrades and challenging boss battles.",
+        "Equal parts timeless and innovative, Times Machine Extra is a unique twist on a classic slot game.",
       thumbnailUrl:
         "https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=800&q=80",
-      gameUrl: "#",
-      controls: "WASD to move, Space to shoot, E for special ability",
-      tags: ["Action", "Shooter", "Space"],
-      role: "Lead Game Designer and Programmer. Developed the core gameplay mechanics, enemy AI patterns, and weapon upgrade system."
+      gameUrl: "https://rmg.boomfantasy.com/timesmachineextra/1/dist/index.html",
+      controls: "Select your bet, I recommend staying on the defualt values. Press the spin button or press spacebar to spin the reels.",
+      tags: ["Inovation", "Shooter", "Space"],
+      role: "I helped originate the concept for Times Machine Extra and led early prototyping efforts, building a fully playable Unity prototype to validate gameplay and gather user feedback before production. I handled wireframing and UX design, wrote the full game rules and marketing copy, and served as daily Producer throughout development. I also managed outsourced art and sound studios and took on the role of Sound Director and shared the role of Sound Designer."
     },
     {
       id: "game2",
       title: "Fanatics Fire Roulette",
       description:
-        "A mind-bending puzzle adventure through mysterious landscapes. Solve increasingly complex puzzles to unlock the story.",
+        "A true 3d Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
       thumbnailUrl:
         "https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=800&q=80",
       gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
-      controls: "Mouse to select and move pieces, R to reset puzzle",
-      tags: ["Puzzle", "Adventure", "Strategy"],
-      role: "Game Designer and Front-end Developer. Created the user interface, puzzle mechanics, and narrative structure. Collaborated with artists to create the visual style."
+      controls: "Place your bets on the table, Press the Spin button to start the game",
+      tags: ["Casino", "Roulette","3D"],
+      role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game’s complete sound design."
     },
     {
       id: "game3",
