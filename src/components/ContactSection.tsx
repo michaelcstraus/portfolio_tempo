@@ -178,9 +178,9 @@ const ContactSection = ({
   };
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
+    <section className="w-full bg-background">
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center mb-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               Get In Touch
@@ -192,7 +192,7 @@ const ContactSection = ({
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-5xl gap-12 pt-12 md:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2">
           {/* Contact Form */}
           <Card className="w-full">
             <CardHeader>
