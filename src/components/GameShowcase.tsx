@@ -73,24 +73,60 @@ export default function GameShowcase({
     },
     {
       id: "game3",
-      title: "Dungeon Crawler",
+      title: "Blast Radius",
       description:
-        "Explore procedurally generated dungeons, defeat monsters, and collect loot in this roguelike adventure.",
+        "A truly Innovative iGaming experience. ",
       thumbnailUrl:
         "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?w=800&q=80",
-      gameUrl: "#",
+      gameUrl: "https://rmg.boomfantasy.com/blastradius/1/dist/index.html",
       controls: "Arrow keys to move, Z to attack, X to use item",
-      tags: ["RPG", "Roguelike", "Adventure"],
-      role: "Level Designer and System Designer. Developed the procedural generation algorithm, combat system, and progression mechanics. Balanced gameplay difficulty and rewards."
+      tags: ["Inovation", "Instant Win", "WYSIWYG"],
+      role: "I led the early concept development and prototyping of Blast Radius, building a Unity prototype to test gameplay mechanics before full production. My responsibilities included UX design, wireframing, and daily production oversight. I authored the game rules, wrote marketing copy, and managed external art and sound vendors. As Sound Director, I shaped the game’s audio identity—including recording custom alien vocals featuring myself and my daughter for the game's signature “oop-eeep” backing music."
     },
     {
       id: "game4",
-      title: "Speed Racer",
+      title: "Retro Riches",
       description:
         "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
       thumbnailUrl:
         "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
-      gameUrl: "#",
+      gameUrl: "https://slotcatalog.com/en/slots/Retro-Riches?ajax=1&blck=demo-widget",
+      controls: "Arrow keys to steer, Space to boost, Shift to drift",
+      tags: ["Racing", "Action", "Sports"],
+      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+    },
+    {
+      id: "game5",
+      title: "Beat The House",
+      description:
+        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+      thumbnailUrl:
+        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+      gameUrl: "https://slotcatalog.com/en/slots/Beat-The-House?ajax=1&blck=demo-widget",
+      controls: "Arrow keys to steer, Space to boost, Shift to drift",
+      tags: ["Racing", "Action", "Sports"],
+      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+    },
+    {
+      id: "game6",
+      title: "Green Machine Deluxe Power Bet",
+      description:
+        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+      thumbnailUrl:
+        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+      gameUrl: "https://slotcatalog.com/en/slots/Green-Machine-Deluxe-Power-Bet?ajax=1&blck=demo-widget",
+      controls: "Arrow keys to steer, Space to boost, Shift to drift",
+      tags: ["Racing", "Action", "Sports"],
+      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+    },
+      {
+      id: "game6",
+      title: "Interstellar Attack",
+      description:
+        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+      thumbnailUrl:
+        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+      gameUrl: "https://slotcatalog.com/en/slots/Interstellar-Attack?ajax=1&blck=demo-widget",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
       role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
