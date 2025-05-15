@@ -59,7 +59,7 @@ export default function MusicSection({
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-primary mb-4">Music Portfolio</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Explore my music projects and productions. From sound design to composition, here's a collection of my audio work.
+            A selection of my personal music projects that I've worked on over the years.
           </p>
         </div>
 

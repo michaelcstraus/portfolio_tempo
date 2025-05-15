@@ -63,6 +63,14 @@ const SkillsDisplay = ({
       ],
     },
     {
+      title: "Adjunct Professor: Sound Design for Games",
+      company: "Johns Hopkins University (Peabody Institute)",
+      period: "2021 - 2022",
+      description:
+        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+    },
+    {
       title: "Innovation Lead",
       company: "High 5 Games",
       period: "2018 - 2021",
@@ -121,7 +129,7 @@ const SkillsDisplay = ({
             with a focus on creating engaging player experiences.
           </p>
         </div>
-
+        
         <Tabs defaultValue="all" className="w-full">
           <div className="flex justify-center mb-8">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
