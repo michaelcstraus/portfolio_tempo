@@ -122,7 +122,7 @@ const ContactSection = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -131,25 +131,50 @@ const ContactSection = ({
 
     setFormStatus("submitting");
 
-    // Simulate form submission
-    setTimeout(() => {
-      // In a real application, you would send the form data to a server here
-      console.log("Form submitted:", formState);
-      setFormStatus("success");
-
-      // Reset form after successful submission
-      setFormState({
-        name: "",
-        email: "",
-        purpose: "",
-        message: "",
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formState),
       });
 
+      const data = await response.json();
+
+      if (response.ok) {
+        setFormStatus("success");
+        
+        // Reset form after successful submission
+        setFormState({
+          name: "",
+          email: "",
+          purpose: "",
+          message: "",
+        });
+
+        // Reset form status after a delay
+        setTimeout(() => {
+          setFormStatus("idle");
+        }, 5000);
+      } else {
+        console.error('Form submission error:', data.error);
+        setFormStatus("error");
+        
+        // Reset form status after a delay
+        setTimeout(() => {
+          setFormStatus("idle");
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setFormStatus("error");
+      
       // Reset form status after a delay
       setTimeout(() => {
         setFormStatus("idle");
       }, 5000);
-    }, 1500);
+    }
   };
 
   return (
