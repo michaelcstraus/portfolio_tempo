@@ -53,7 +53,7 @@ export default function GameShowcase({
       description:
         "Equal parts timeless and innovative, Times Machine Extra is a unique twist on a classic slot game.",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=800&q=80",
+        "https://cdn.prod.website-files.com/5eea6df1518e5b7e3f7203af/66b26b409a285feaddd2b68c_66916ef78952473b0b1e32f5_time-machine-extra-website-screenshot.png",
       gameUrl: "https://rmg.boomfantasy.com/timesmachineextra/1/dist/index.html",
       controls: "Select your bet, I recommend staying on the defualt values. Press the spin button or press spacebar to spin the reels.",
       tags: ["Inovation", "Shooter", "Space"],
@@ -65,7 +65,7 @@ export default function GameShowcase({
       description:
         "A true 3d Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=800&q=80",
+        "/images/games/fire_roulette_thumb.png",
       gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
       controls: "Place your bets on the table, Press the Spin button to start the game",
       tags: ["Casino", "Roulette","3D"],
@@ -73,11 +73,11 @@ export default function GameShowcase({
     },
     {
       id: "game3",
-      title: "Blast Radius",
+      title: "$mash Comet",
       description:
         "A truly Innovative iGaming experience. ",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?w=800&q=80",
+        "https://cdn.prod.website-files.com/5eea6df1518e5b7e3f7203af/66916a5603c4a506f9e85989_%24mash-comet-website-thumbnail-1200x627.png",
       gameUrl: "https://rmg.boomfantasy.com/blastradius/1/dist/index.html",
       controls: "Arrow keys to move, Z to attack, X to use item",
       tags: ["Inovation", "Instant Win", "WYSIWYG"],
@@ -89,7 +89,7 @@ export default function GameShowcase({
       description:
         "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+        "https://www.gamingintelligence.com/wp-content/uploads/2021/07/H5G_RetroRichesmob-1024x576.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Retro-Riches?ajax=1&blck=demo-widget",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
@@ -101,7 +101,7 @@ export default function GameShowcase({
       description:
         "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+        "https://www.high5games.com/wp-content/themes/h5g/assets/img/games/2990/banner.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Beat-The-House?ajax=1&blck=demo-widget",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
@@ -113,7 +113,7 @@ export default function GameShowcase({
       description:
         "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+        "https://slotcatalog.com/userfiles/image/games/High-5-Games/16582/Green-Machine-Deluxe-Power-Bet-7.png",
       gameUrl: "https://slotcatalog.com/en/slots/Green-Machine-Deluxe-Power-Bet?ajax=1&blck=demo-widget",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
@@ -125,7 +125,7 @@ export default function GameShowcase({
       description:
         "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
       thumbnailUrl:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80",
+        "https://slotcatalog.com/userfiles/image/games/High-5-Games/20615/Interstellar-Attack-6856797.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Interstellar-Attack?ajax=1&blck=demo-widget",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
