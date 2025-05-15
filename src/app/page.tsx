@@ -3,11 +3,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import GameShowcase from "@/components/GameShowcase";
+import PasswordProtectedGameShowcase from "@/components/PasswordProtectedGameShowcase";
 import SkillsDisplay from "@/components/SkillsDisplay";
-import ProtectedMediaGallery from "@/components/ProtectedMediaGallery";
+import WebDesign from "@/components/WebDesign";
+import MusicSection from "@/components/MusicSection";
 import ContactSection from "@/components/ContactSection";
-import { ArrowDown, Gamepad2, Code, Film, Palette, User } from "lucide-react";
+import { ArrowDown, Gamepad2, Code, Globe, Music, User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -54,7 +55,7 @@ export default function Home() {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="games" className="w-full max-w-6xl mx-auto mt-8 px-4">
-        <TabsList className="w-full grid grid-cols-4 mb-8">
+        <TabsList className="w-full grid grid-cols-5 mb-8">
           <TabsTrigger value="games" className="flex items-center gap-2">
             <Gamepad2 className="h-4 w-4" />
             <span className="hidden sm:inline">Games</span>
@@ -63,9 +64,13 @@ export default function Home() {
             <Code className="h-4 w-4" />
             <span className="hidden sm:inline">Skills</span>
           </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2">
-            <Film className="h-4 w-4" />
-            <span className="hidden sm:inline">Media</span>
+          <TabsTrigger value="web-design" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">Web Design</span>
+          </TabsTrigger>
+          <TabsTrigger value="music" className="flex items-center gap-2">
+            <Music className="h-4 w-4" />
+            <span className="hidden sm:inline">Music</span>
           </TabsTrigger>
           <TabsTrigger value="contact" className="flex items-center gap-2">
             <User className="h-4 w-4" />
@@ -74,42 +79,19 @@ export default function Home() {
         </TabsList>
 
         <TabsContent value="games" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Playable Games
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Check out my interactive HTML5/JS games. Click on any game to play
-              directly in your browser.
-            </p>
-          </div>
-          <GameShowcase />
+          <PasswordProtectedGameShowcase />
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Skills & Experience
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              My expertise spans game design, development, and creative
-              direction with a focus on player experience.
-            </p>
-          </div>
           <SkillsDisplay />
         </TabsContent>
 
-        <TabsContent value="media" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Media Gallery
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Access my private collection of concept art, videos, and
-              development materials.
-            </p>
-          </div>
-          <ProtectedMediaGallery />
+        <TabsContent value="web-design" className="space-y-8 pb-16">
+          <WebDesign />
+        </TabsContent>
+
+        <TabsContent value="music" className="space-y-8 pb-16">
+          <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
         </TabsContent>
 
         <TabsContent value="contact" className="space-y-8 pb-16">
@@ -131,7 +113,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Palette className="h-5 w-5 text-pink-500" />
+              <Globe className="h-5 w-5 text-pink-500" />
               Game Designer Portfolio
             </h3>
             <p className="text-gray-400">
@@ -164,7 +146,15 @@ export default function Home() {
                   href="#"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Media
+                  Web Design
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Music
                 </Link>
               </li>
               <li>
@@ -182,26 +172,7 @@ export default function Home() {
             <h3 className="text-xl font-bold mb-4">Connect</h3>
             <div className="flex space-x-4">
               <Link
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-twitter"
-                >
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                </svg>
-              </Link>
-              <Link
-                href="#"
+                href="https://www.linkedin.com/in/michael-straus-17308544/"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <svg
@@ -222,7 +193,7 @@ export default function Home() {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href="https://github.com/michaelcstraus"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <svg
@@ -242,7 +213,7 @@ export default function Home() {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/stagedivephilly/"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <svg

@@ -42,17 +42,17 @@ const SkillsDisplay = ({
   ],
   experiences = [
     {
-      title: "Lead Game Designer",
-      company: "Pixel Dreams Studios",
-      period: "2020 - Present",
+      title: "Director of Casino Product",
+      company: "Boom Entertainment",
+      period: "2022-2025",
       description:
         "Led a team of 5 designers to create award-winning mobile games with over 1M downloads. Responsible for game mechanics, level design, and player experience optimization.",
       skills: ["Game Design", "Team Leadership", "Unity", "Mobile Gaming"],
     },
     {
-      title: "Game Designer",
-      company: "Interactive Worlds Inc.",
-      period: "2017 - 2020",
+      title: "Innovation Director",
+      company: "Boom Entertainment",
+      period: "2021 - 2022",
       description:
         "Designed game mechanics and levels for 3 AAA console titles. Collaborated with artists and developers to implement engaging player experiences.",
       skills: [
@@ -63,9 +63,25 @@ const SkillsDisplay = ({
       ],
     },
     {
-      title: "Junior Developer",
-      company: "GameCraft Solutions",
-      period: "2015 - 2017",
+      title: "Adjunct Professor: Sound Design for Games",
+      company: "Johns Hopkins University (Peabody Institute)",
+      period: "2021 - 2022",
+      description:
+        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+    },
+    {
+      title: "Innovation Lead",
+      company: "High 5 Games",
+      period: "2018 - 2021",
+      description:
+        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+    },
+    {
+      title: "Technical Sound Designer",
+      company: "High 5 Games",
+      period: "2013 - 2018",
       description:
         "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
       skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
@@ -113,7 +129,7 @@ const SkillsDisplay = ({
             with a focus on creating engaging player experiences.
           </p>
         </div>
-
+        
         <Tabs defaultValue="all" className="w-full">
           <div className="flex justify-center mb-8">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
