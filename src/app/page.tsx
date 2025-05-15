@@ -22,11 +22,11 @@ export default function Home() {
               Michael Straus
             </span>
             <br />
-            <span className="text-white">Game Designer</span>
+            <span className="text-white">Game Director / Designer</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
-            Crafting immersive gaming experiences through innovative design,
+            Crafting immersive experiences through innovative design,
             and engaging mechanics. 
           </p>
 
