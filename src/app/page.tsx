@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PasswordProtectedGameShowcase from "@/components/PasswordProtectedGameShowcase";
 import SkillsDisplay from "@/components/SkillsDisplay";
 import WebDesign from "@/components/WebDesign";
+import MusicSection from "@/components/MusicSection";
 import ContactSection from "@/components/ContactSection";
-import { ArrowDown, Gamepad2, Code, Globe, Palette, User } from "lucide-react";
+import { ArrowDown, Gamepad2, Code, Globe, Music, User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -54,7 +55,7 @@ export default function Home() {
 
       {/* Navigation Tabs */}
       <Tabs defaultValue="games" className="w-full max-w-6xl mx-auto mt-8 px-4">
-        <TabsList className="w-full grid grid-cols-4 mb-8">
+        <TabsList className="w-full grid grid-cols-5 mb-8">
           <TabsTrigger value="games" className="flex items-center gap-2">
             <Gamepad2 className="h-4 w-4" />
             <span className="hidden sm:inline">Games</span>
@@ -66,6 +67,10 @@ export default function Home() {
           <TabsTrigger value="web-design" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             <span className="hidden sm:inline">Web Design</span>
+          </TabsTrigger>
+          <TabsTrigger value="music" className="flex items-center gap-2">
+            <Music className="h-4 w-4" />
+            <span className="hidden sm:inline">Music</span>
           </TabsTrigger>
           <TabsTrigger value="contact" className="flex items-center gap-2">
             <User className="h-4 w-4" />
@@ -94,6 +99,10 @@ export default function Home() {
           <WebDesign />
         </TabsContent>
 
+        <TabsContent value="music" className="space-y-8 pb-16">
+          <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
+        </TabsContent>
+
         <TabsContent value="contact" className="space-y-8 pb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -113,7 +122,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Palette className="h-5 w-5 text-pink-500" />
+              <Globe className="h-5 w-5 text-pink-500" />
               Game Designer Portfolio
             </h3>
             <p className="text-gray-400">
@@ -147,6 +156,14 @@ export default function Home() {
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Web Design
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Music
                 </Link>
               </li>
               <li>
