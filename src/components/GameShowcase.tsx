@@ -161,78 +161,77 @@ export default function GameShowcase({
         )}
 
         <Dialog open={isPlaying} onOpenChange={setIsPlaying}>
-          <DialogContent className="sm:max-w-[95vw] sm:max-h-[95vh] h-[95vh] w-full max-w-screen-2xl p-2 md:p-4">
-            <div className="flex flex-col h-full space-y-4">
-              <DialogHeader className="shrink-0 px-2">
-                <DialogTitle className="flex justify-between items-center">
-                  <span>{selectedGame?.title}</span>
-                  <Button variant="ghost" size="icon" onClick={handleCloseGame}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </DialogTitle>
-                <DialogDescription className="line-clamp-1">{selectedGame?.description}</DialogDescription>
-              </DialogHeader>
-              
-              <div className="flex flex-col space-y-4 flex-1 overflow-auto">
-                {/* Game Container with 16:9 aspect ratio, taking as much space as possible */}
-                <div className="relative w-full" style={{ height: "calc(95vh - 180px)" }}>
-                  {selectedGame && selectedGame.gameUrl && selectedGame.gameUrl !== "#" ? (
-                    <iframe
-                      src={selectedGame.gameUrl}
-                      title={selectedGame.title}
-                      className="w-full h-full border-0 rounded-md"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-md">
-                      <div className="text-center p-6">
-                        <Gamepad className="h-16 w-16 mx-auto mb-4 text-primary" />
-                        <p className="text-lg font-medium mb-2">
-                          Game not available
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          This game doesn't have a playable URL configured yet.
-                        </p>
-                        <div className="bg-background p-4 rounded-md inline-block">
-                          <h4 className="font-medium mb-2 flex items-center">
-                            <Gamepad className="mr-2 h-4 w-4" /> Controls:
-                          </h4>
-                          <p className="text-sm">{selectedGame?.controls}</p>
-                        </div>
+          <DialogContent className="sm:max-w-[95vw] sm:max-h-[95vh] h-[95vh] w-full max-w-screen-2xl p-2 md:p-4 overflow-hidden flex flex-col">
+            <DialogHeader className="shrink-0 px-2">
+              <DialogTitle className="flex justify-between items-center">
+                <span>{selectedGame?.title}</span>
+                <Button variant="ghost" size="icon" onClick={handleCloseGame}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+              <DialogDescription className="line-clamp-2">{selectedGame?.description}</DialogDescription>
+            </DialogHeader>
+            
+            {/* Main content area with scrolling */}
+            <div className="flex-1 overflow-y-auto pb-4">
+              {/* Game iframe container */}
+              <div className="w-full aspect-video mb-4">
+                {selectedGame && selectedGame.gameUrl && selectedGame.gameUrl !== "#" ? (
+                  <iframe
+                    src={selectedGame.gameUrl}
+                    title={selectedGame.title}
+                    className="w-full h-full border-0 rounded-md"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted rounded-md">
+                    <div className="text-center p-6">
+                      <Gamepad className="h-16 w-16 mx-auto mb-4 text-primary" />
+                      <p className="text-lg font-medium mb-2">
+                        Game not available
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        This game doesn't have a playable URL configured yet.
+                      </p>
+                      <div className="bg-background p-4 rounded-md inline-block">
+                        <h4 className="font-medium mb-2 flex items-center">
+                          <Gamepad className="mr-2 h-4 w-4" /> Controls:
+                        </h4>
+                        <p className="text-sm">{selectedGame?.controls}</p>
                       </div>
                     </div>
-                  )}
-                </div>
-                
-                {/* Info Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
-                  {/* My Role Section */}
-                  {selectedGame && selectedGame.role && (
-                    <div className="bg-muted p-4 rounded-md">
-                      <h3 className="text-lg font-semibold mb-2 flex items-center">
-                        <User className="mr-2 h-4 w-4" /> My Role
-                      </h3>
-                      <p className="text-sm text-muted-foreground">{selectedGame.role}</p>
-                    </div>
-                  )}
-                  
-                  {/* Game Controls Section */}
+                  </div>
+                )}
+              </div>
+              
+              {/* Information panels */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* My Role Section */}
+                {selectedGame && selectedGame.role && (
                   <div className="bg-muted p-4 rounded-md">
-                    <h4 className="text-lg font-semibold mb-2 flex items-center">
-                      <Gamepad className="mr-2 h-4 w-4" /> Game Info
-                    </h4>
-                    <p className="text-sm mb-2"><span className="font-medium">Controls:</span> {selectedGame?.controls}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedGame?.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                    <h3 className="text-lg font-semibold mb-2 flex items-center">
+                      <User className="mr-2 h-4 w-4" /> My Role
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{selectedGame.role}</p>
+                  </div>
+                )}
+                
+                {/* Game Controls Section */}
+                <div className="bg-muted p-4 rounded-md">
+                  <h4 className="text-lg font-semibold mb-2 flex items-center">
+                    <Gamepad className="mr-2 h-4 w-4" /> Game Info
+                  </h4>
+                  <p className="text-sm mb-2"><span className="font-medium">Controls:</span> {selectedGame?.controls}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedGame?.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
