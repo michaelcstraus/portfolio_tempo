@@ -48,9 +48,9 @@ const ContactSection = ({
   phone = "+1 (555) 123-4567",
   socialLinks = {
     twitter: "https://twitter.com/gamedesigner",
-    linkedin: "https://linkedin.com/in/gamedesigner",
-    github: "https://github.com/gamedesigner",
-    instagram: "https://instagram.com/gamedesigner",
+    linkedin: "https://www.linkedin.com/in/michael-straus-17308544/",
+    github: "https://github.com/michaelcstraus",
+    instagram: "https://www.instagram.com/stagedivephilly/",
   },
 }: ContactSectionProps) => {
   const [formState, setFormState] = useState({
