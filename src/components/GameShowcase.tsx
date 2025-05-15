@@ -175,7 +175,7 @@ export default function GameShowcase({
             {/* Main content area with scrolling */}
             <div className="flex-1 overflow-y-auto pb-4">
               {/* Game iframe container */}
-              <div className="w-full aspect-video mb-4">
+              <div className="w-full aspect-video mb-4 mx-auto max-w-5xl">
                 {selectedGame && selectedGame.gameUrl && selectedGame.gameUrl !== "#" ? (
                   <iframe
                     src={selectedGame.gameUrl}
