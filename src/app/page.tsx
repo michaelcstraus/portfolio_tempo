@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +13,20 @@ import ContactSection from "@/components/ContactSection";
 import { ArrowDown, Gamepad2, Code, Globe, Music, User } from "lucide-react";
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState("games");
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToTabs = (tabValue: string) => {
+    setActiveTab(tabValue);
+    
+    if (tabsRef.current) {
+      // Add a small delay to ensure the DOM has updated
+      setTimeout(() => {
+        tabsRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
       {/* Hero Section */}
@@ -35,78 +51,75 @@ export default function Home() {
             <Button
               size="lg"
               className="bg-pink-600 hover:bg-pink-700 text-white"
+              onClick={() => scrollToTabs("games")}
             >
               View My Work
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white/20"
+              className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium"
+              onClick={() => scrollToTabs("contact")}
             >
               Contact Me
             </Button>
           </div>
         </div>
 
-        <div className="absolute bottom-10 animate-bounce">
-          <ArrowDown className="h-10 w-10 text-white/70" />
+        <div 
+          className="absolute bottom-10 animate-bounce cursor-pointer" 
+          onClick={() => scrollToTabs("games")}
+        >
+          <ArrowDown className="h-10 w-10 text-white/70 hover:text-white transition-colors" />
         </div>
       </section>
 
       {/* Navigation Tabs */}
-      <Tabs defaultValue="games" className="w-full max-w-6xl mx-auto mt-8 px-4">
-        <TabsList className="w-full grid grid-cols-5 mb-8">
-          <TabsTrigger value="games" className="flex items-center gap-2">
-            <Gamepad2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Games</span>
-          </TabsTrigger>
-          <TabsTrigger value="skills" className="flex items-center gap-2">
-            <Code className="h-4 w-4" />
-            <span className="hidden sm:inline">Skills</span>
-          </TabsTrigger>
-          <TabsTrigger value="web-design" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            <span className="hidden sm:inline">Web Design</span>
-          </TabsTrigger>
-          <TabsTrigger value="music" className="flex items-center gap-2">
-            <Music className="h-4 w-4" />
-            <span className="hidden sm:inline">Music</span>
-          </TabsTrigger>
-          <TabsTrigger value="contact" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className="hidden sm:inline">Contact</span>
-          </TabsTrigger>
-        </TabsList>
+      <div ref={tabsRef}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-6xl mx-auto mt-8 px-4">
+          <TabsList className="w-full grid grid-cols-5 mb-8">
+            <TabsTrigger value="games" className="flex items-center gap-2">
+              <Gamepad2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Games</span>
+            </TabsTrigger>
+            <TabsTrigger value="skills" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              <span className="hidden sm:inline">Skills</span>
+            </TabsTrigger>
+            <TabsTrigger value="web-design" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">Web Design</span>
+            </TabsTrigger>
+            <TabsTrigger value="music" className="flex items-center gap-2">
+              <Music className="h-4 w-4" />
+              <span className="hidden sm:inline">Music</span>
+            </TabsTrigger>
+            <TabsTrigger value="contact" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Contact</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="games" className="space-y-8 pb-16">
-          <PasswordProtectedGameShowcase />
-        </TabsContent>
+          <TabsContent value="games" className="space-y-8 pb-16">
+            <PasswordProtectedGameShowcase />
+          </TabsContent>
 
-        <TabsContent value="skills" className="space-y-8 pb-16">
-          <SkillsDisplay />
-        </TabsContent>
+          <TabsContent value="skills" className="space-y-8 pb-16">
+            <SkillsDisplay />
+          </TabsContent>
 
-        <TabsContent value="web-design" className="space-y-8 pb-16">
-          <WebDesign />
-        </TabsContent>
+          <TabsContent value="web-design" className="space-y-8 pb-16">
+            <WebDesign />
+          </TabsContent>
 
-        <TabsContent value="music" className="space-y-8 pb-16">
-          <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
-        </TabsContent>
+          <TabsContent value="music" className="space-y-8 pb-16">
+            <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
+          </TabsContent>
 
-        <TabsContent value="contact" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Get In Touch
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Interested in collaboration or have questions about my work? Let's
-              connect!
-            </p>
-          </div>
-          <ContactSection />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="contact" className="space-y-8 pb-16">
+            <ContactSection />
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Footer */}
       <footer className="w-full bg-black/90 text-white py-8 px-4">
@@ -126,44 +139,44 @@ export default function Home() {
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="#"
+                <button
+                  onClick={() => scrollToTabs("games")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Games
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="#"
+                <button
+                  onClick={() => scrollToTabs("skills")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Skills
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="#"
+                <button
+                  onClick={() => scrollToTabs("web-design")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Web Design
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="#"
+                <button
+                  onClick={() => scrollToTabs("music")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Music
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="#"
+                <button
+                  onClick={() => scrollToTabs("contact")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Contact
-                </Link>
+                </button>
               </li>
             </ul>
           </div>
@@ -174,6 +187,8 @@ export default function Home() {
               <Link
                 href="https://www.linkedin.com/in/michael-straus-17308544/"
                 className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -195,6 +210,8 @@ export default function Home() {
               <Link
                 href="https://github.com/michaelcstraus"
                 className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -215,6 +232,8 @@ export default function Home() {
               <Link
                 href="https://www.instagram.com/stagedivephilly/"
                 className="text-gray-400 hover:text-white transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

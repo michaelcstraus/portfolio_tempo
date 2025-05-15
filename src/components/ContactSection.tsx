@@ -296,7 +296,7 @@ const ContactSection = ({
 
           {/* Contact Information */}
           <div className="flex flex-col space-y-8">
-            <Card className="w-full">
+            {/* <Card className="w-full">
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
                 <CardDescription>
@@ -326,7 +326,7 @@ const ContactSection = ({
                   <span>{phone}</span>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="w-full">
               <CardHeader>
@@ -337,7 +337,7 @@ const ContactSection = ({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
-                  {socialLinks.twitter && (
+                  {/* {socialLinks.twitter && (
                     <a
                       href={socialLinks.twitter}
                       target="_blank"
@@ -347,7 +347,7 @@ const ContactSection = ({
                       <Twitter className="h-5 w-5" />
                       <span className="sr-only">Twitter</span>
                     </a>
-                  )}
+                  )} */}
 
                   {socialLinks.linkedin && (
                     <a
