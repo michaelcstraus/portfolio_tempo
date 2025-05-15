@@ -26,7 +26,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Gamepad, Info, X } from "lucide-react";
+import { Gamepad, Info, X, User } from "lucide-react";
 
 interface Game {
   id: string;
@@ -36,6 +36,7 @@ interface Game {
   gameUrl: string;
   controls: string;
   tags: string[];
+  role?: string;
 }
 
 interface GameShowcaseProps {
@@ -56,17 +57,19 @@ export default function GameShowcase({
       gameUrl: "#",
       controls: "WASD to move, Space to shoot, E for special ability",
       tags: ["Action", "Shooter", "Space"],
+      role: "Lead Game Designer and Programmer. Developed the core gameplay mechanics, enemy AI patterns, and weapon upgrade system."
     },
     {
       id: "game2",
-      title: "Puzzle Quest",
+      title: "Fanatics Fire Roulette",
       description:
         "A mind-bending puzzle adventure through mysterious landscapes. Solve increasingly complex puzzles to unlock the story.",
       thumbnailUrl:
         "https://images.unsplash.com/photo-1611996575749-79a3a250f948?w=800&q=80",
-      gameUrl: "#",
+      gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
       controls: "Mouse to select and move pieces, R to reset puzzle",
       tags: ["Puzzle", "Adventure", "Strategy"],
+      role: "Game Designer and Front-end Developer. Created the user interface, puzzle mechanics, and narrative structure. Collaborated with artists to create the visual style."
     },
     {
       id: "game3",
@@ -78,6 +81,7 @@ export default function GameShowcase({
       gameUrl: "#",
       controls: "Arrow keys to move, Z to attack, X to use item",
       tags: ["RPG", "Roguelike", "Adventure"],
+      role: "Level Designer and System Designer. Developed the procedural generation algorithm, combat system, and progression mechanics. Balanced gameplay difficulty and rewards."
     },
     {
       id: "game4",
@@ -89,6 +93,7 @@ export default function GameShowcase({
       gameUrl: "#",
       controls: "Arrow keys to steer, Space to boost, Shift to drift",
       tags: ["Racing", "Action", "Sports"],
+      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
     },
   ],
   title = "Featured Games",
@@ -156,33 +161,78 @@ export default function GameShowcase({
         )}
 
         <Dialog open={isPlaying} onOpenChange={setIsPlaying}>
-          <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] h-[80vh]">
-            <DialogHeader>
-              <DialogTitle className="flex justify-between items-center">
-                <span>{selectedGame?.title}</span>
-                <Button variant="ghost" size="icon" onClick={handleCloseGame}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogTitle>
-              <DialogDescription>{selectedGame?.description}</DialogDescription>
-            </DialogHeader>
-            <div className="flex-1 bg-muted rounded-md overflow-hidden relative h-full">
-              {/* Game iframe would be embedded here */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center p-6">
-                  <Gamepad className="h-16 w-16 mx-auto mb-4 text-primary" />
-                  <p className="text-lg font-medium mb-2">
-                    Game would load here
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    In a real implementation, an iframe or embedded HTML5 game
-                    would appear here.
-                  </p>
-                  <div className="bg-background p-4 rounded-md inline-block">
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <Gamepad className="mr-2 h-4 w-4" /> Controls:
+          <DialogContent className="sm:max-w-[95vw] sm:max-h-[95vh] h-[95vh] w-full max-w-screen-2xl p-2 md:p-4">
+            <div className="flex flex-col h-full space-y-4">
+              <DialogHeader className="shrink-0 px-2">
+                <DialogTitle className="flex justify-between items-center">
+                  <span>{selectedGame?.title}</span>
+                  <Button variant="ghost" size="icon" onClick={handleCloseGame}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DialogTitle>
+                <DialogDescription className="line-clamp-1">{selectedGame?.description}</DialogDescription>
+              </DialogHeader>
+              
+              <div className="flex flex-col space-y-4 flex-1 overflow-auto">
+                {/* Game Container with 16:9 aspect ratio, taking as much space as possible */}
+                <div className="relative w-full" style={{ height: "calc(95vh - 180px)" }}>
+                  {selectedGame && selectedGame.gameUrl && selectedGame.gameUrl !== "#" ? (
+                    <iframe
+                      src={selectedGame.gameUrl}
+                      title={selectedGame.title}
+                      className="w-full h-full border-0 rounded-md"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-md">
+                      <div className="text-center p-6">
+                        <Gamepad className="h-16 w-16 mx-auto mb-4 text-primary" />
+                        <p className="text-lg font-medium mb-2">
+                          Game not available
+                        </p>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          This game doesn't have a playable URL configured yet.
+                        </p>
+                        <div className="bg-background p-4 rounded-md inline-block">
+                          <h4 className="font-medium mb-2 flex items-center">
+                            <Gamepad className="mr-2 h-4 w-4" /> Controls:
+                          </h4>
+                          <p className="text-sm">{selectedGame?.controls}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Info Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
+                  {/* My Role Section */}
+                  {selectedGame && selectedGame.role && (
+                    <div className="bg-muted p-4 rounded-md">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center">
+                        <User className="mr-2 h-4 w-4" /> My Role
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{selectedGame.role}</p>
+                    </div>
+                  )}
+                  
+                  {/* Game Controls Section */}
+                  <div className="bg-muted p-4 rounded-md">
+                    <h4 className="text-lg font-semibold mb-2 flex items-center">
+                      <Gamepad className="mr-2 h-4 w-4" /> Game Info
                     </h4>
-                    <p className="text-sm">{selectedGame?.controls}</p>
+                    <p className="text-sm mb-2"><span className="font-medium">Controls:</span> {selectedGame?.controls}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedGame?.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

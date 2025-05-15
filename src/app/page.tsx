@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import GameShowcase from "@/components/GameShowcase";
+import PasswordProtectedGameShowcase from "@/components/PasswordProtectedGameShowcase";
 import SkillsDisplay from "@/components/SkillsDisplay";
-import ProtectedMediaGallery from "@/components/ProtectedMediaGallery";
+import WebDesign from "@/components/WebDesign";
 import ContactSection from "@/components/ContactSection";
-import { ArrowDown, Gamepad2, Code, Film, Palette, User } from "lucide-react";
+import { ArrowDown, Gamepad2, Code, Globe, Palette, User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -63,9 +63,9 @@ export default function Home() {
             <Code className="h-4 w-4" />
             <span className="hidden sm:inline">Skills</span>
           </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2">
-            <Film className="h-4 w-4" />
-            <span className="hidden sm:inline">Media</span>
+          <TabsTrigger value="web-design" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">Web Design</span>
           </TabsTrigger>
           <TabsTrigger value="contact" className="flex items-center gap-2">
             <User className="h-4 w-4" />
@@ -74,16 +74,7 @@ export default function Home() {
         </TabsList>
 
         <TabsContent value="games" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Playable Games
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Check out my interactive HTML5/JS games. Click on any game to play
-              directly in your browser.
-            </p>
-          </div>
-          <GameShowcase />
+          <PasswordProtectedGameShowcase />
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-8 pb-16">
@@ -99,17 +90,8 @@ export default function Home() {
           <SkillsDisplay />
         </TabsContent>
 
-        <TabsContent value="media" className="space-y-8 pb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Media Gallery
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Access my private collection of concept art, videos, and
-              development materials.
-            </p>
-          </div>
-          <ProtectedMediaGallery />
+        <TabsContent value="web-design" className="space-y-8 pb-16">
+          <WebDesign />
         </TabsContent>
 
         <TabsContent value="contact" className="space-y-8 pb-16">
@@ -164,7 +146,7 @@ export default function Home() {
                   href="#"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Media
+                  Web Design
                 </Link>
               </li>
               <li>
