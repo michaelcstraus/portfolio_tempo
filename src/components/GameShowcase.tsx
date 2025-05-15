@@ -73,13 +73,24 @@ export default function GameShowcase({
     { id: "game3",
       title: "Fanatics Fire Roulette",
       description:
-        "A true 3d Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
+        "A true 3D Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
       thumbnailUrl:
         "/images/games/fire_roulette_thumb.png",
       gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
       controls: "Place your bets on the table, Press the Spin button to start the game",
       tags: ["Casino", "Roulette","3D"],
       role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game’s complete sound design."
+    },
+    { id: "game9",
+      title: "Fanatics Multihand Blackjack with Sidebets",
+      description:
+        "A Premium Blackjack experience with Sidebets and Multihand play.",
+      thumbnailUrl:
+        "https://gambling.com/cdn-cgi/image/,h=,format=webp/https://objects.kaxmedia.com/genesis/fanatics-casino-app.png?v=f5eda9e1e8272d91414338a43ad68e9c6b9b5d57",
+      gameUrl: "https://rmg.boomfantasy.com/blackjackmultihand2/dist/index.html?landscape=true",
+      controls: "Place your bets on the table, Press the deal button to start the game",
+      tags: ["Casino", "Blackjack","3D"],
+      role: "As Producer and UX Designer, I led end-to-end development on The Fanatics Blackjack Games and their Alternate Skins, including wireframes, player flow, and client communication with Fanatics.  Rounding out my role, I served as Music Director, created the game’s complete sound design, and composed the Piano Trio Background music"
     },
     {
       id: "game4",
