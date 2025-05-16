@@ -28,17 +28,29 @@ interface SkillsDisplayProps {
 
 const SkillsDisplay = ({
   skills = [
-    { name: "Game Design", level: 90, category: "design" },
-    { name: "Level Design", level: 85, category: "design" },
-    { name: "Unity", level: 80, category: "development" },
-    { name: "Unreal Engine", level: 75, category: "development" },
-    { name: "JavaScript", level: 70, category: "development" },
-    { name: "C#", level: 85, category: "development" },
-    { name: "3D Modeling", level: 65, category: "art" },
-    { name: "UI/UX Design", level: 75, category: "art" },
-    { name: "Storytelling", level: 90, category: "creative" },
-    { name: "Team Leadership", level: 80, category: "soft" },
+    { name: "Team Leadership", level: 90, category: "soft" },
     { name: "Project Management", level: 85, category: "soft" },
+    { name: "Product Management", level: 85, category: "soft" },
+    { name: "Innovation Lead", level: 85, category: "soft" },
+    { name: "Vendor Management", level: 75, category: "soft" },
+    { name: "Client Management", level: 70, category: "soft" },
+    { name: "Unity", level: 90, category: "technical" },
+    { name: "JavaScript", level: 80, category: "technical" },
+    { name: "React", level: 80, category: "technical" },
+    { name: "LLM/AI", level: 85, category: "technical" },
+    { name: "ThreeJS", level: 75, category: "technical" },
+    { name: "Python", level: 80, category: "technical" },
+    { name: "NodeJS", level: 75, category: "technical" },
+    { name: "C#", level: 80, category: "technical" },
+    { name: "FMOD", level: 65, category: "technical" },
+    { name: "HowlerJS", level: 65, category: "technical" },
+    { name: "UI/UX", level: 80, category: "creative" },
+    { name: "Art Directing", level: 85, category: "creative" },
+    { name: "Teaching/Mentorship", level: 85, category: "soft" },
+    { name: "Music Composition", level: 90, category: "creative" },
+    { name: "Sound Design", level: 85, category: "creative" },
+    { name: "Music Directing", level: 90, category: "creative" },
+    { name: "Storyboarding", level: 90, category: "creative" },
   ],
   experiences = [
     {
@@ -94,17 +106,11 @@ const SkillsDisplay = ({
   const categories = [
     { id: "all", name: "All Skills", icon: <Brain className="h-4 w-4" /> },
     {
-      id: "design",
-      name: "Game Design",
-      icon: <Gamepad2 className="h-4 w-4" />,
-    },
-    {
-      id: "development",
-      name: "Development",
+      id: "technical",
+      name: "Technical",
       icon: <Code className="h-4 w-4" />,
     },
-    { id: "art", name: "Art & Visual", icon: <Palette className="h-4 w-4" /> },
-    { id: "creative", name: "Creative", icon: <Film className="h-4 w-4" /> },
+    { id: "creative", name: "Creative", icon: <Palette className="h-4 w-4" /> },
     { id: "soft", name: "Soft Skills", icon: <Users className="h-4 w-4" /> },
   ];
 
@@ -132,7 +138,7 @@ const SkillsDisplay = ({
         
         <Tabs defaultValue="all" className="w-full">
           <div className="flex justify-center mb-8">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {categories.map((category) => (
                 <TabsTrigger
                   key={category.id}

@@ -120,13 +120,13 @@ export default function GameShowcase({
       id: "game6",
       title: "Beat The House",
       description:
-        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+        "Experience the thrill of a completely beat-synced slot machine, featuring short and medium-term persistence features that elevate your gameplay.",
       thumbnailUrl:
         "https://www.high5games.com/wp-content/themes/h5g/assets/img/games/2990/banner.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Beat-The-House?ajax=1&blck=demo-widget",
-      controls: "Select your bet, Press the spin button to spin the reels.",
+      controls: "Select your bet, Press the spin button to spin the reels. Various layers of the music track are added as you fill in each column of the meter",
       tags: ["Racing", "Action", "Sports"],
-      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay. I worked on the innovation team, built the original prototype, and served as technical sound programmer, working on the beat syncing capabilities and R&Ding how to sync the music to certain animations."
     },
     {
       id: "game7",

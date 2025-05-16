@@ -40,14 +40,14 @@ export default function StageDiveShowcase() {
     {
       id: "evo3",
       title: "User-Focused Enhancements",
-      description: "With a solid foundation, focus shifted to user experience, Designing the React Components from scratch to get the feel I wanted. Adding a more dedicated search function and refining the UI/UX based on initial feedback.",
+      description: "With a solid foundation, focus shifted to user experience, Designing the React Components from scratch to get the feel I wanted. Adding an expanded search function and refining the UI/UX based on initial feedback.",
       icon: Search,
     },
   ];
 
   const currentState = {
     title: "StageDivePhilly.com Today",
-    description: "Currently, StageDivePhilly.com serves as [describe its main purpose and who it serves]. Key features include [Feature 1], [Feature 2], and [Feature 3]. It's built with [mention key technologies like Next.js, Tailwind CSS, etc.].",
+    description: "Currently, StageDivePhilly.com serves as a tool for music lovers in Philadelphia.",
     imageUrl: "/images/stagedive/stagedive_now.png", // Placeholder - ideally a screenshot
     liveUrl: "https://stagedivephilly.com", // Replace with actual URL
   };
@@ -56,21 +56,21 @@ export default function StageDiveShowcase() {
     {
       id: "future1",
       title: "Short-Term: Enhanced User Interaction",
-      description: "Planned features include [Specific Feature A, e.g., improved filtering, user profiles] and [Specific Feature B, e.g., notification system]. Expected Q3 2024.",
+      description: "Implementing enhanced filtering and tagging capabilities, as well as introducing video previews for select promoted events.",
       status: "planned",
       icon: Users,
     },
     {
       id: "future2",
       title: "Mid-Term: Mobile App & API",
-      description: "Exploring the development of a native mobile application and a public API to allow other developers to integrate with StageDive data. Expected H1 2025.",
+      description: "Developing a native mobile application and a public API, with the integration of predictive elements to enhance user experience. Additionally, expanding the platform to other markets, further increasing its reach and impact.",
       status: "planned",
       icon: Rocket,
     },
     {
       id: "future3",
       title: "Long-Term: Community & Expansion",
-      description: "The long-term vision includes [Broader Goal A, e.g., building a strong community platform] and potentially expanding to [New Area/City/Feature Set].",
+      description: "Envisioning a social media-inspired community that bridges the gap between music enthusiasts and artists. This platform will facilitate connections, foster engagement, and provide a space for users to share their experiences, discover new music, and support their favorite artists.",
       status: "planned",
       icon: Target,
     },
