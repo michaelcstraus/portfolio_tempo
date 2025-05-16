@@ -59,7 +59,7 @@ const SkillsDisplay = ({
       period: "2022-2025",
       description:
         "Led a team of 5 designers to create award-winning mobile games with over 1M downloads. Responsible for game mechanics, level design, and player experience optimization.",
-      skills: ["Game Design", "Team Leadership", "Unity", "Mobile Gaming"],
+      skills: ["Game Design", "Team Leadership", "Product Strategy", "Vendor Management"],
     },
     {
       title: "Innovation Director",
@@ -68,9 +68,9 @@ const SkillsDisplay = ({
       description:
         "Designed game mechanics and levels for 3 AAA console titles. Collaborated with artists and developers to implement engaging player experiences.",
       skills: [
-        "Level Design",
-        "Unreal Engine",
-        "Console Gaming",
+        "Game Design",
+        "UI/UX",
+        "JavaScript",
         "Collaboration",
       ],
     },
@@ -80,7 +80,7 @@ const SkillsDisplay = ({
       period: "2021 - 2022",
       description:
         "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
-      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+      skills: ["FMOD", "Unity", "Syllabus Development", "Teaching"],
     },
     {
       title: "Innovation Lead",
@@ -88,7 +88,7 @@ const SkillsDisplay = ({
       period: "2018 - 2021",
       description:
         "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
-      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+      skills: ["Unity", "C#", "Bug Fixing", "Audio Programming", "Design", "Team Leadership"],
     },
     {
       title: "Technical Sound Designer",
@@ -96,7 +96,7 @@ const SkillsDisplay = ({
       period: "2013 - 2018",
       description:
         "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
-      skills: ["Unity", "JavaScript", "C#", "Bug Fixing"],
+      skills: ["Unity", "C#", "Recording" , "Studio Design", "Audio Programming"],
     },
   ],
 }: SkillsDisplayProps) => {
