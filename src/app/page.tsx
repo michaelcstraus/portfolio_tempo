@@ -43,8 +43,8 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
-            Crafting immersive experiences through innovative design,
-            and engaging mechanics. 
+            Blending technical expertise with creative vision
+            
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mt-8">
