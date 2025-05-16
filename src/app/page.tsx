@@ -81,10 +81,6 @@ export default function Home() {
               <Gamepad2 className="h-4 w-4" />
               <span className="hidden sm:inline">Games</span>
             </TabsTrigger>
-            <TabsTrigger value="skills" className="flex items-center gap-2">
-              <Code className="h-4 w-4" />
-              <span className="hidden sm:inline">Skills</span>
-            </TabsTrigger>
             <TabsTrigger value="stagedive" className="flex items-center gap-2">
               <Milestone className="h-4 w-4" />
               <span className="hidden sm:inline">StageDive</span>
@@ -92,6 +88,10 @@ export default function Home() {
             <TabsTrigger value="music" className="flex items-center gap-2">
               <Music className="h-4 w-4" />
               <span className="hidden sm:inline">Music</span>
+            </TabsTrigger>
+            <TabsTrigger value="skills" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              <span className="hidden sm:inline">Skills</span>
             </TabsTrigger>
             <TabsTrigger value="contact" className="flex items-center gap-2">
               <User className="h-4 w-4" />
