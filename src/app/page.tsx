@@ -7,10 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PasswordProtectedGameShowcase from "@/components/PasswordProtectedGameShowcase";
 import SkillsDisplay from "@/components/SkillsDisplay";
-import WebDesign from "@/components/WebDesign";
+import StageDiveShowcase from "@/components/StageDiveShowcase";
 import MusicSection from "@/components/MusicSection";
 import ContactSection from "@/components/ContactSection";
-import { ArrowDown, Gamepad2, Code, Globe, Music, User } from "lucide-react";
+import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide-react";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
@@ -85,9 +85,9 @@ export default function Home() {
               <Code className="h-4 w-4" />
               <span className="hidden sm:inline">Skills</span>
             </TabsTrigger>
-            <TabsTrigger value="web-design" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">Web Design</span>
+            <TabsTrigger value="stagedive" className="flex items-center gap-2">
+              <Milestone className="h-4 w-4" />
+              <span className="hidden sm:inline">StageDive</span>
             </TabsTrigger>
             <TabsTrigger value="music" className="flex items-center gap-2">
               <Music className="h-4 w-4" />
@@ -107,8 +107,8 @@ export default function Home() {
             <SkillsDisplay />
           </TabsContent>
 
-          <TabsContent value="web-design" className="space-y-8 pb-16">
-            <WebDesign />
+          <TabsContent value="stagedive" className="space-y-8 pb-16">
+            <StageDiveShowcase />
           </TabsContent>
 
           <TabsContent value="music" className="space-y-8 pb-16">
@@ -156,10 +156,10 @@ export default function Home() {
               </li>
               <li>
                 <button
-                  onClick={() => scrollToTabs("web-design")}
+                  onClick={() => scrollToTabs("stagedive")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Web Design
+                  StageDive
                 </button>
               </li>
               <li>
