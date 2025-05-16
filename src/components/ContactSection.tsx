@@ -122,7 +122,7 @@ const ContactSection = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -131,31 +131,56 @@ const ContactSection = ({
 
     setFormStatus("submitting");
 
-    // Simulate form submission
-    setTimeout(() => {
-      // In a real application, you would send the form data to a server here
-      console.log("Form submitted:", formState);
-      setFormStatus("success");
-
-      // Reset form after successful submission
-      setFormState({
-        name: "",
-        email: "",
-        purpose: "",
-        message: "",
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formState),
       });
 
+      const data = await response.json();
+
+      if (response.ok) {
+        setFormStatus("success");
+        
+        // Reset form after successful submission
+        setFormState({
+          name: "",
+          email: "",
+          purpose: "",
+          message: "",
+        });
+
+        // Reset form status after a delay
+        setTimeout(() => {
+          setFormStatus("idle");
+        }, 5000);
+      } else {
+        console.error('Form submission error:', data.error);
+        setFormStatus("error");
+        
+        // Reset form status after a delay
+        setTimeout(() => {
+          setFormStatus("idle");
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setFormStatus("error");
+      
       // Reset form status after a delay
       setTimeout(() => {
         setFormStatus("idle");
       }, 5000);
-    }, 1500);
+    }
   };
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
+    <section className="w-full bg-background">
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center mb-8">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               Get In Touch
@@ -167,7 +192,7 @@ const ContactSection = ({
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-5xl gap-12 pt-12 md:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2">
           {/* Contact Form */}
           <Card className="w-full">
             <CardHeader>
@@ -296,7 +321,7 @@ const ContactSection = ({
 
           {/* Contact Information */}
           <div className="flex flex-col space-y-8">
-            <Card className="w-full">
+            {/* <Card className="w-full">
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
                 <CardDescription>
@@ -326,7 +351,7 @@ const ContactSection = ({
                   <span>{phone}</span>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="w-full">
               <CardHeader>
@@ -337,7 +362,7 @@ const ContactSection = ({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
-                  {socialLinks.twitter && (
+                  {/* {socialLinks.twitter && (
                     <a
                       href={socialLinks.twitter}
                       target="_blank"
@@ -347,7 +372,7 @@ const ContactSection = ({
                       <Twitter className="h-5 w-5" />
                       <span className="sr-only">Twitter</span>
                     </a>
-                  )}
+                  )} */}
 
                   {socialLinks.linkedin && (
                     <a

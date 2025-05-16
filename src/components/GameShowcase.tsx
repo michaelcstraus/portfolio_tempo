@@ -55,31 +55,42 @@ export default function GameShowcase({
       thumbnailUrl:
         "https://cdn.prod.website-files.com/5eea6df1518e5b7e3f7203af/66b26b409a285feaddd2b68c_66916ef78952473b0b1e32f5_time-machine-extra-website-screenshot.png",
       gameUrl: "https://rmg.boomfantasy.com/timesmachineextra/1/dist/index.html",
-      controls: "Select your bet, I recommend staying on the defualt values. Press the spin button or press spacebar to spin the reels.",
+      controls: "Select your bet, I recommend staying on the defualt values. Press the spin button to spin the reels.",
       tags: ["Inovation", "Shooter", "Space"],
       role: "I helped originate the concept for Times Machine Extra and led early prototyping efforts, building a fully playable Unity prototype to validate gameplay and gather user feedback before production. I handled wireframing and UX design, wrote the full game rules and marketing copy, and served as daily Producer throughout development. I also managed outsourced art and sound studios and took on the role of Sound Director and shared the role of Sound Designer."
     },
     { id: "game2",
       title: "Lucky Money Tree",
       description:
-        "A true 3d Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
+        "A premium feeling Instant-Win style game with engaging characters and a fun multipler sequence.",
       thumbnailUrl:
         "https://cdn.prod.website-files.com/5eea6df1518e5b7e3f7203af/66b26c17ce7e1a74dd85dd97_63cedf80d6c8154ea37af039_Lucky-Money-Tree-screenshot.png",
       gameUrl: "https://rmg.boomfantasy.com/moneytree/1/dist/index.html",
-      controls: "Place your bets on the table, Press the Spin button to start the game",
+      controls: "Choose your bet amount, Spam the Spin button to win big!",
       tags: ["Casino", "Roulette","3D"],
-      role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game’s complete sound design."
+      role: "I championed the introduction of instant-win mechanics into Boom’s game library, identifying the trend early and pushing Lucky Money Tree as a vehicle for innovation. I led the R&D phase to implement dynamic, layered Spine animations—engineering a blend system that made the tree react fluidly and convincingly to player interactions. In addition to daily production oversight, I served as Sound Director, shaping the game’s audio and coordinating external sound resources to match the game’s whimsical, high-energy feel."
     },
     { id: "game3",
       title: "Fanatics Fire Roulette",
       description:
-        "A true 3d Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
+        "A true 3D Game optimized for mobile web. American Roulette with Fire Multiplier. Win up to 500X your bet!",
       thumbnailUrl:
         "/images/games/fire_roulette_thumb.png",
       gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
       controls: "Place your bets on the table, Press the Spin button to start the game",
       tags: ["Casino", "Roulette","3D"],
       role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game’s complete sound design."
+    },
+    { id: "game9",
+      title: "Fanatics Multihand Blackjack with Sidebets",
+      description:
+        "A Premium Blackjack experience with Sidebets and Multihand play.",
+      thumbnailUrl:
+        "https://gambling.com/cdn-cgi/image/,h=,format=webp/https://objects.kaxmedia.com/genesis/fanatics-casino-app.png?v=f5eda9e1e8272d91414338a43ad68e9c6b9b5d57",
+      gameUrl: "https://rmg.boomfantasy.com/blackjackmultihand2/dist/index.html?landscape=true",
+      controls: "Place your bets on the table, Press the deal button to start the game",
+      tags: ["Casino", "Blackjack","3D"],
+      role: "As Producer and UX Designer, I led end-to-end development on The Fanatics Blackjack Games and their Alternate Skins, including wireframes, player flow, and client communication with Fanatics.  Rounding out my role, I served as Music Director, created the game’s complete sound design, and composed the Piano Trio Background music"
     },
     {
       id: "game4",
@@ -89,7 +100,7 @@ export default function GameShowcase({
       thumbnailUrl:
         "https://cdn.prod.website-files.com/5eea6df1518e5b7e3f7203af/66916a5603c4a506f9e85989_%24mash-comet-website-thumbnail-1200x627.png",
       gameUrl: "https://rmg.boomfantasy.com/blastradius/1/dist/index.html",
-      controls: "Arrow keys to move, Z to attack, X to use item",
+      controls: "Find a Prize or Prizes you want and click on it until you win. I Recommend setting the bet to at least $.10",
       tags: ["Inovation", "Instant Win", "WYSIWYG"],
       role: "I led the early concept development and prototyping of Blast Radius, building a Unity prototype to test gameplay mechanics before full production. My responsibilities included UX design, wireframing, and daily production oversight. I authored the game rules, wrote marketing copy, and managed external art and sound vendors. As Sound Director, I shaped the game’s audio identity—including recording custom alien vocals featuring myself and my daughter for the game's signature “oop-eeep” backing music."
     },
@@ -97,13 +108,13 @@ export default function GameShowcase({
       id: "game5",
       title: "Retro Riches",
       description:
-        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+        "A Fever dream of an iGaming experience. A mixture of unique mechanics and a long term persistence system.",
       thumbnailUrl:
         "https://www.gamingintelligence.com/wp-content/uploads/2021/07/H5G_RetroRichesmob-1024x576.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Retro-Riches?ajax=1&blck=demo-widget",
-      controls: "Arrow keys to steer, Space to boost, Shift to drift",
-      tags: ["Racing", "Action", "Sports"],
-      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+      controls: "Select your bet, Press the spin button to spin the reels.",
+      tags: ["Innovation", "Retro", "Dots and Shapes"],
+      role: "Born from a vague “dots and shapes” prompt from our CEO, I led the innovation and feature design of Retro Riches, translating that spark into a fully playable Unity prototype in just two weeks. The prototype revealed surprisingly engaging gameplay, prompting full development. I designed and implemented a long-term progression system that tracks player collections across sessions—expanding their symbol bank over time and increasing prize potential. The result was a fresh take on slots with a persistent, player-driven meta layer."
     },
     {
       id: "game6",
@@ -113,7 +124,7 @@ export default function GameShowcase({
       thumbnailUrl:
         "https://www.high5games.com/wp-content/themes/h5g/assets/img/games/2990/banner.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Beat-The-House?ajax=1&blck=demo-widget",
-      controls: "Arrow keys to steer, Space to boost, Shift to drift",
+      controls: "Select your bet, Press the spin button to spin the reels.",
       tags: ["Racing", "Action", "Sports"],
       role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
     },
@@ -121,25 +132,25 @@ export default function GameShowcase({
       id: "game7",
       title: "Green Machine Deluxe Power Bet",
       description:
-        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+        "An updated version of the classic Green Machine Deluxe game with a new Power Bet mechanic.",
       thumbnailUrl:
         "https://slotcatalog.com/userfiles/image/games/High-5-Games/16582/Green-Machine-Deluxe-Power-Bet-7.png",
       gameUrl: "https://slotcatalog.com/en/slots/Green-Machine-Deluxe-Power-Bet?ajax=1&blck=demo-widget",
-      controls: "Arrow keys to steer, Space to boost, Shift to drift",
-      tags: ["Racing", "Action", "Sports"],
-      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+      controls: "Select your bet, Press the spin button to spin the reels.",
+      tags: ["WYSIWYG", "Classic IP", "Buy-A-Bonus"],
+      role: 'As part of the Innovation Team, I built the original prototypes for Green Machine with Power Bet, designing and testing new mechanics for one of our most popular IPs. I helped conceptualize the Power Bet feature—a user-activated bonus that adds volatility and excitement through an upfront wager. The goal was to modernize a classic title by giving players more agency and risk-reward strategy, while maintaining the core appeal of the original Green Machine experience.'
     },
       {
       id: "game8",
       title: "Interstellar Attack",
       description:
-        "Race against time and opponents in this high-octane racing game with customizable vehicles and challenging tracks.",
+        "Blow Up Rocks and Aliens for prizes. A combination of short term and long term persistence features that upgrade the player's experience.",
       thumbnailUrl:
         "https://slotcatalog.com/userfiles/image/games/High-5-Games/20615/Interstellar-Attack-6856797.jpg",
       gameUrl: "https://slotcatalog.com/en/slots/Interstellar-Attack?ajax=1&blck=demo-widget",
-      controls: "Arrow keys to steer, Space to boost, Shift to drift",
-      tags: ["Racing", "Action", "Sports"],
-      role: "Technical Director and Physics Programmer. Implemented the vehicle physics system, track design tools, and AI racing opponents. Optimized performance for smooth gameplay."
+      controls: "Select your bet. Press the spin button to spin the reels.",
+      tags: ["Memory Feature", "Action", "Space"],
+      role: "As a member of the Innovation Team, I designed the core mechanics and built the original prototype for Interstellar Attack, a sci-fi-inspired slot game that fuses arcade action with deep progression systems. I implemented both short-term and multi-session persistence features—delivering instant power-ups during gameplay while unlocking upgraded ships and higher RTP over time. I also collaborated with the math team to design a custom JSON protocol that handled persistent player data across sessions, enabling seamless backend integration and personalized progression."
     },
   ],
   title = "Featured Games",

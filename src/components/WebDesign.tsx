@@ -84,10 +84,12 @@ export default function WebDesign({
   ],
 }: WebDesignProps) {
   return (
-    <div className="w-full bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-primary mb-4">Web Design Projects</h2>
+    <div className="w-full bg-background">
+      <div className="container px-4 md:px-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+            Web Design Projects
+          </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             My web development portfolio showcasing responsive, interactive, and user-friendly websites and applications.
           </p>
