@@ -31,7 +31,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center bg-background">
       {/* Hero Section */}
       <section className="w-full min-h-screen flex flex-col items-center justify-center relative bg-gradient-to-br from-purple-900 via-violet-800 to-indigo-900 text-white p-4 md:p-8">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
 
         <div className="max-w-5xl mx-auto text-center z-10 space-y-6">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in">

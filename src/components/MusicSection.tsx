@@ -61,21 +61,21 @@ export default function MusicSection({
             Music Portfolio
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            A selection of my personal music projects that I've worked on over the years.
+            A selection of my favorite music projects that I've worked on over the years.
+            <br />
+            <br />
+
+            I played bass on all of them. Some I mixed, Some I produced, Some I recorded, some I arranged. 
           </p>
         </div>
 
         <Tabs defaultValue="playlist" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+          {/* <TabsList className="flex justify-center mb-8">
             <TabsTrigger value="playlist" className="flex items-center gap-2">
               <Music className="h-4 w-4" />
               <span>Playlist</span>
             </TabsTrigger>
-            <TabsTrigger value="projects" className="flex items-center gap-2">
-              <Disc className="h-4 w-4" />
-              <span>Projects</span>
-            </TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <TabsContent value="playlist" className="space-y-8">
             <div className="bg-card rounded-lg overflow-hidden shadow-lg">
@@ -93,35 +93,7 @@ export default function MusicSection({
             </div>
           </TabsContent>
 
-          <TabsContent value="projects" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <Card key={project.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl mb-1">{project.title}</CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <Mic className="h-3 w-3" /> {project.artist} • {project.year}
-                        </CardDescription>
-                      </div>
-                      <Badge variant="outline" className="bg-primary/10 text-primary">
-                        {project.genre}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-3">
-                      <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                        <Headphones className="h-3 w-3" /> Role: {project.role}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{project.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+          {/* Future sub-tabs can be added here */}
         </Tabs>
       </div>
     </div>

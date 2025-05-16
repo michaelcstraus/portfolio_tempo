@@ -12,7 +12,7 @@ interface PasswordProtectedGameShowcaseProps {
 }
 
 export default function PasswordProtectedGameShowcase({
-  password = "gamepass123", // Default password for the games section
+  password = "gamepass1234", // Default password for the games section
 }: PasswordProtectedGameShowcaseProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inputPassword, setInputPassword] = useState("");
