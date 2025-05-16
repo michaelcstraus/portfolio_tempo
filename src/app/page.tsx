@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,83 @@ import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide
 export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
   const tabsRef = useRef<HTMLDivElement>(null);
+
+  // --- Start of Glitch Text Effect Code ---
+  const professionalTitles = [
+    "Game Director / Designer",
+    "Audio Programmer",
+    "Innovation Lead",
+    "Creative Technologist",
+    "Technical Sound Designer",
+  ];
+
+  const [displayedTitle, setDisplayedTitle] = useState(professionalTitles[0]);
+  const activeTitleIndexRef = useRef(0);
+  const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const generateGlitchedText = (text: string, intensity: number = 0.7) => {
+    const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
+    return text
+      .split("")
+      .map(char => (char !== ' ' && Math.random() > (1 - intensity) ? chars[Math.floor(Math.random() * chars.length)] : char))
+      .join("");
+  };
+
+  const cleanUpTimers = () => {
+    if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
+    if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
+    glitchEffectIntervalRef.current = null;
+    nextTitleTimeoutRef.current = null;
+  };
+
+  const startGlitchSequence = () => {
+    cleanUpTimers(); // Clear any existing timers before starting a new sequence
+
+    activeTitleIndexRef.current = (activeTitleIndexRef.current + 1) % professionalTitles.length;
+    const targetTitle = professionalTitles[activeTitleIndexRef.current];
+    
+    let iterations = 0;
+    const maxIterations = 5 + Math.floor(Math.random() * 5); 
+    const glitchDuration = 50; 
+
+    glitchEffectIntervalRef.current = setInterval(() => {
+      if (iterations < maxIterations) {
+        setDisplayedTitle(generateGlitchedText(targetTitle));
+        iterations++;
+      } else {
+        if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
+        glitchEffectIntervalRef.current = null;
+        setDisplayedTitle(targetTitle); 
+        
+        nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000); 
+      }
+    }, glitchDuration);
+  };
+
+  const handleMouseEnter = () => {
+    const currentlyVisibleCleanTitleIndex = professionalTitles.indexOf(displayedTitle);
+    if (currentlyVisibleCleanTitleIndex !== -1) {
+        activeTitleIndexRef.current = currentlyVisibleCleanTitleIndex;
+    }
+    // If displayedTitle is glitched, activeTitleIndexRef already points to the last target clean title.
+    // So, the (activeTitleIndexRef.current + 1) in startGlitchSequence will correctly pick the next one.
+    startGlitchSequence();
+  };
+
+  const handleMouseLeave = () => {
+    cleanUpTimers();
+    activeTitleIndexRef.current = 0; 
+    setDisplayedTitle(professionalTitles[0]); 
+  };
+
+  useEffect(() => {
+    // Cleanup function to be called when the component unmounts
+    return () => {
+      cleanUpTimers();
+    };
+  }, []); // Empty dependency array ensures this runs only on mount and unmount
+  // --- End of Glitch Text Effect Code ---
 
   const scrollToTabs = (tabValue: string) => {
     setActiveTab(tabValue);
@@ -39,7 +116,14 @@ export default function Home() {
               Michael Straus
             </span>
             <br />
-            <span className="text-white">Game Director / Designer</span>
+            <span 
+              className="text-white"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              style={{ display: 'inline-block', cursor: 'default' }} 
+            >
+              {displayedTitle}
+            </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
