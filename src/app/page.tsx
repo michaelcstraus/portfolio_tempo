@@ -16,6 +16,14 @@ const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
 const GAME_DESIGNER_TITLE = "Game Designer";
 
+const PROFESSIONAL_TITLES = [
+  "Product Director",
+  GAME_DESIGNER_TITLE,
+  AUDIO_PROGRAMMER_TITLE,
+  CREATIVE_LEAD_TITLE,
+  "Sound Director",
+];
+
 const CHAOTIC_COLORS = ['#FF1493', '#FF8C00', '#ADFF2F', '#00BFFF', '#BA55D3', '#FFD700'];
 const HARMONIOUS_PALETTE_CL = ['#ec4899', '#22d3ee', '#a855f7', '#ffffff']; // Pink, Cyan, Purple, White
 
@@ -23,15 +31,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  const professionalTitles = [
-    "Product Director",
-    GAME_DESIGNER_TITLE,
-    AUDIO_PROGRAMMER_TITLE,
-    CREATIVE_LEAD_TITLE,
-    "Sound Director",
-  ];
-
-  const [displayedTitle, setDisplayedTitle] = useState(professionalTitles[0]);
+  const [displayedTitle, setDisplayedTitle] = useState(PROFESSIONAL_TITLES[0]);
   const [isGlowing, setIsGlowing] = useState(false);
   const [currentGlowClass, setCurrentGlowClass] = useState('');
   const activeTitleIndexRef = useRef(0);
@@ -199,10 +199,13 @@ export default function Home() {
   // Add auto-advance timeout reference
   const gameDesignerAutoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Ref to signal that the auto-advance mechanism should trigger a sequence change
+  const forceGameDesignerAdvanceRef = useRef(false);
+
   // Add a ref to track if auto-advance is already set up
   const isAutoAdvanceSetupRef = useRef(false);
 
-  // Simplified auto-advance with better title transition
+  // Auto-advance for Game Designer title
   useEffect(() => {
     // Auto-advance for Game Designer title
     if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
@@ -213,28 +216,28 @@ export default function Home() {
       }
       
       // Set up the auto-advance timer
+      console.log("AUTO-ADVANCE: Setting 5s timer for Game Designer idle");
       gameDesignerAutoAdvanceRef.current = setTimeout(() => {
-        // Only proceed if still on Game Designer and still paused
+        // Check condition again, in case something else changed gameDesignerPaused
         if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
-          console.log("AUTO-ADVANCE: Taking action");
-          
-          setGameDesignerPaused(false); // Allow transition
-          // activeTitleIndexRef.current should already point to GAME_DESIGNER_TITLE's index.
-          // startGlitchSequence will calculate the next title based on this.
-          console.log(`AUTO-ADVANCE: Triggering transition from Game Designer (current index: ${activeTitleIndexRef.current})`);
-          startGlitchSequence();
+          console.log("AUTO-ADVANCE: 5s idle timer fired. Setting flag and unpausing.");
+          forceGameDesignerAdvanceRef.current = true;
+          setGameDesignerPaused(false); // This will trigger the other useEffect to call startGlitchSequence
+        } else {
+          console.log("AUTO-ADVANCE: 5s idle timer fired, but conditions no longer met.");
         }
       }, 5000);
     }
     
-    // Always clean up timer when component unmounts or Game Designer is no longer active
+    // Always clean up timer when component unmounts or Game Designer is no longer active or paused
     return () => {
       if (gameDesignerAutoAdvanceRef.current) {
         clearTimeout(gameDesignerAutoAdvanceRef.current);
         gameDesignerAutoAdvanceRef.current = null;
+        console.log("AUTO-ADVANCE: Cleaned up 5s idle timer in useEffect cleanup.");
       }
     };
-  }, [displayedTitle, gameDesignerPaused, professionalTitles]);
+  }, [displayedTitle, gameDesignerPaused]);
 
   // Update the handleLetterClick function to only start the game when clicking a lit letter
   const handleLetterClick = (letterId: string) => {
@@ -403,8 +406,8 @@ export default function Home() {
     setCurrentGameTime(0); // Reset live timer value too
     cleanUpTimers(); // This will clear liveGameTimerIntervalRef via clearGameDesignerTimers
 
-    const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
-    const targetTitle = professionalTitles[nextIndex];
+    const nextIndex = (activeTitleIndexRef.current + 1) % PROFESSIONAL_TITLES.length;
+    const targetTitle = PROFESSIONAL_TITLES[nextIndex];
     
     // Ensure gameDesignerPaused is false if the target is not Game Designer.
     // If it is Game Designer, it will be set to true after the glitch.
@@ -547,6 +550,16 @@ export default function Home() {
     }, glitchDuration);
   };
 
+  // useEffect: Handles the actual advancement after gameDesignerPaused is set to false by the auto-advance timeout
+  useEffect(() => {
+    if (displayedTitle === GAME_DESIGNER_TITLE && !gameDesignerPaused && forceGameDesignerAdvanceRef.current) {
+      console.log("AUTO-ADVANCE: Detected forced advance signal. Calling startGlitchSequence.");
+      forceGameDesignerAdvanceRef.current = false; // Reset the flag
+      startGlitchSequence();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedTitle, gameDesignerPaused]); // startGlitchSequence is omitted as it's not memoized; logic relies on other deps.
+
   const handleMouseEnter = () => {
     startGlitchSequence();
   };
@@ -555,7 +568,7 @@ export default function Home() {
     // If the Game Designer game was won and the winner message is currently showing,
     // we want to preserve its display and the timeout that will transition away from it.
     // We should only clear other incidental animation timers.
-    if (professionalTitles[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE && showWinnerMessage) {
+    if (PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE && showWinnerMessage) {
       if (glitchEffectIntervalRef.current) {
         clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
@@ -574,7 +587,7 @@ export default function Home() {
     // - Mouse leave during other animated titles.
     cleanUpTimers(); // This will clear nextTitleTimeoutRef, glitchEffectIntervalRef, and all game/animation timers.
 
-    const lastSettledTitle = professionalTitles[activeTitleIndexRef.current];
+    const lastSettledTitle = PROFESSIONAL_TITLES[activeTitleIndexRef.current];
     setDisplayedTitle(lastSettledTitle); // Revert to the actual settled title
     setIsGlowing(false);
     setCurrentGlowClass('');
