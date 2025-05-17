@@ -267,30 +267,14 @@ export default function Home() {
 
   // Add effect to auto-advance if user doesn't interact
   useEffect(() => {
-    // Clear any existing auto-advance timer
-    if (gameDesignerAutoAdvanceRef.current) {
-      clearTimeout(gameDesignerAutoAdvanceRef.current);
-      gameDesignerAutoAdvanceRef.current = null;
-    }
-    
-    // Start a new timer when Game Designer becomes active and paused
-    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
-      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
-        // Only advance if we're still on Game Designer and still paused
-        if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
-          setGameDesignerPaused(false);
-          startGlitchSequence();
-        }
-      }, 4000); // Auto-advance after 4 seconds if no interaction
-    }
-    
-    // Clean up on unmount
+    // Clean up auto-advance timer on unmount
     return () => {
       if (gameDesignerAutoAdvanceRef.current) {
         clearTimeout(gameDesignerAutoAdvanceRef.current);
+        gameDesignerAutoAdvanceRef.current = null;
       }
     };
-  }, [displayedTitle, gameDesignerPaused]);
+  }, []);
 
   useEffect(() => {
     if (gameWonRef.current && gameEndTime && gameStartTime) {
@@ -333,21 +317,43 @@ export default function Home() {
     setIsCreativeLeadAnimating(false);
     setCreativeLeadLetters([]);
     
-    // Don't reset if we're already in Game Designer mode and it's paused for interaction
+    // Don't reset if we're already in Game Designer mode and it's paused
     if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
       return;
     }
     
+    // Clear any existing auto-advance timer when starting a new sequence
+    if (gameDesignerAutoAdvanceRef.current) {
+      clearTimeout(gameDesignerAutoAdvanceRef.current);
+      gameDesignerAutoAdvanceRef.current = null;
+    }
+    
     setIsGameDesignerAnimating(false); 
-    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset live timer value too
+    setShowWinnerMessage(false); 
+    setGameStartTime(null); 
+    setGameEndTime(null); 
+    setCurrentGameTime(0); // Reset live timer value too
     cleanUpTimers(); // This will clear liveGameTimerIntervalRef via clearGameDesignerTimers
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
     
-    // If we're transitioning to Game Designer, set the paused state to true
+    // Set up Game Designer auto-advance timeout
     if (targetTitle === GAME_DESIGNER_TITLE) {
       setGameDesignerPaused(true);
+      
+      // Schedule auto-advance after a delay if user doesn't interact
+      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
+        // Only auto-advance if we're still on Game Designer and still no gameplay
+        if (displayedTitle === GAME_DESIGNER_TITLE && gameStartTime === null) {
+          console.log("AUTO-ADVANCING: Game Designer title timed out");
+          // Force next title
+          const nextTitle = (nextIndex + 1) % professionalTitles.length;
+          activeTitleIndexRef.current = nextTitle;
+          setGameDesignerPaused(false);
+          startGlitchSequence();
+        }
+      }, 5000);
     } else {
       setGameDesignerPaused(false);
     }
@@ -564,7 +570,36 @@ export default function Home() {
       }
     };
   }, []);
-  // --- End of Glitch Text Effect Code ---
+
+  // Add this effect to handle initial Game Designer title display
+  useEffect(() => {
+    // When Game Designer title first appears and is in paused state
+    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused && !gameStartTime) {
+      console.log("Game Designer title appeared, setting up auto-advance");
+      
+      // Clear any existing timeout
+      if (gameDesignerAutoAdvanceRef.current) {
+        clearTimeout(gameDesignerAutoAdvanceRef.current);
+      }
+      
+      // Set up new auto-advance
+      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
+        // Only auto-advance if we're still on Game Designer and still no gameplay
+        if (displayedTitle === GAME_DESIGNER_TITLE && !gameStartTime) {
+          console.log("AUTO-ADVANCING: Game Designer title timed out (from effect)");
+          // Force next title
+          const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
+          activeTitleIndexRef.current = nextIndex;
+          setGameDesignerPaused(false);
+          startGlitchSequence();
+        }
+      }, 5000);
+    }
+    
+    return () => {
+      // No need to clean up here as it's handled in the main cleanup effect
+    };
+  }, [displayedTitle, gameDesignerPaused, gameStartTime]);
 
   const scrollToTabs = (tabValue: string) => {
     setActiveTab(tabValue);
