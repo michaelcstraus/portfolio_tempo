@@ -182,6 +182,9 @@ export default function Home() {
     gameRoundTimerRef.current = setTimeout(() => { startGameDesignerRound(); }, 1500 + Math.random() * 500);
   };
 
+  // Add auto-advance timeout reference
+  const gameDesignerAutoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleLetterClick = (letterId: string) => {
     // Start the game if we're paused on the Game Designer title
     if (gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE) {
@@ -212,48 +215,82 @@ export default function Home() {
     
     // Rest of the existing click handler for active gameplay
     const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
-
-    if (letterBeforeClick && letterBeforeClick.status === 'good' && gameStartTime === null) {
+    
+    // Check if we need to start the timer (first click) AND if the letter is "good"
+    if (letterBeforeClick && letterBeforeClick.status === 'good') {
+      // Start the timer if this is the first click
+      if (gameStartTime === null) {
         setGameStartTime(Date.now());
         setCurrentGameTime(0);
+        
         if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current);
         liveGameTimerIntervalRef.current = setInterval(() => {
-            setGameStartTime(prevStartTime => {
-                if (prevStartTime) {
-                    setCurrentGameTime((Date.now() - prevStartTime) / 1000);
-                }
-                return prevStartTime;
-            });
-        }, 100);
-    }
-
-    setGameDesignerLetters(prevLetters => {
-      const newLetters = prevLetters.map(l => {
-        if (l.id === letterId && l.status === 'good') {
-          if (popSoundRef.current) { popSoundRef.current.currentTime = 0; popSoundRef.current.play().catch(e => console.error("Pop sound error", e));}
-          return { ...l, status: 'popped' as GameLetterStatus };
-        }
-        return l;
-      });
-      const totalGameLetters = newLetters.filter(l => l.char !== ' ').length;
-      const poppedGameLetters = newLetters.filter(l=> l.status === 'popped' && l.char !== ' ').length;
-
-      if (poppedGameLetters === totalGameLetters && totalGameLetters > 0) {
-        // Check gameEndTime state from the closure of setGameDesignerLetters's parent scope.
-        // If gameEndTime is not already set (by another rapid click or event)
-        if (!prevLetters.some(l => l.status === 'popped' && newLetters.find(nl => nl.id === l.id)?.status !== 'popped')) { // Ensure this is the click that wins
-            const currentGlobalGameEndTime = gameEndTime; // This captures gameEndTime from the outer scope, might be stale
-            // We set the ref and call setGameEndTime. useEffect will use the updated state.
-            if (!currentGlobalGameEndTime) { // only if not already set by a concurrent event.
-                gameWonRef.current = true; 
-                setGameEndTime(Date.now()); // This will trigger the useEffect
+          setGameStartTime(prevStartTime => {
+            if (prevStartTime) {
+              setCurrentGameTime((Date.now() - prevStartTime) / 1000);
             }
-        }
+            return prevStartTime;
+          });
+        }, 100);
       }
-      return newLetters;
-    });
-    // Removed direct call to endGameDesignerGame(true) if gameJustWon
+      
+      // Play pop sound and update letter state
+      if (popSoundRef.current) {
+        popSoundRef.current.currentTime = 0;
+        popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
+      }
+      
+      // Mark the letter as popped
+      setGameDesignerLetters(prevLetters => {
+        const newLetters = prevLetters.map(l => {
+          if (l.id === letterId && l.status === 'good') {
+            return { ...l, status: 'popped' as GameLetterStatus };
+          }
+          return l;
+        });
+        
+        // Check for win condition
+        const totalGameLetters = newLetters.filter(l => l.char !== ' ').length;
+        const poppedGameLetters = newLetters.filter(l => l.status === 'popped' && l.char !== ' ').length;
+        
+        if (poppedGameLetters === totalGameLetters && totalGameLetters > 0) {
+          if (!gameEndTime) {
+            setGameEndTime(Date.now());
+            gameWonRef.current = true;
+          }
+        }
+        
+        return newLetters;
+      });
+    }
   };
+
+  // Add effect to auto-advance if user doesn't interact
+  useEffect(() => {
+    // Clear any existing auto-advance timer
+    if (gameDesignerAutoAdvanceRef.current) {
+      clearTimeout(gameDesignerAutoAdvanceRef.current);
+      gameDesignerAutoAdvanceRef.current = null;
+    }
+    
+    // Start a new timer when Game Designer becomes active and paused
+    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
+      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
+        // Only advance if we're still on Game Designer and still paused
+        if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
+          setGameDesignerPaused(false);
+          startGlitchSequence();
+        }
+      }, 4000); // Auto-advance after 4 seconds if no interaction
+    }
+    
+    // Clean up on unmount
+    return () => {
+      if (gameDesignerAutoAdvanceRef.current) {
+        clearTimeout(gameDesignerAutoAdvanceRef.current);
+      }
+    };
+  }, [displayedTitle, gameDesignerPaused]);
 
   useEffect(() => {
     if (gameWonRef.current && gameEndTime && gameStartTime) {
