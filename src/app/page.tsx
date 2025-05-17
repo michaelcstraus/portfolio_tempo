@@ -199,30 +199,42 @@ export default function Home() {
   // Add auto-advance timeout reference
   const gameDesignerAutoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // When Game Designer title first appears, highlight a random letter
+  // Add a ref to track if auto-advance is already set up
+  const isAutoAdvanceSetupRef = useRef(false);
+
+  // Simplified auto-advance with better title transition
   useEffect(() => {
+    // Auto-advance for Game Designer title
     if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
-      // Highlight a random letter when Game Designer title first appears
-      setGameDesignerLetters(prevLetters => {
-        // Only modify if no letter is already highlighted (prevent re-runs)
-        if (!prevLetters.some(l => l.status === 'good')) {
-          // Choose a random letter to highlight first
-          const nonSpaceLetters = prevLetters.filter(l => l.char !== ' ');
-          if (nonSpaceLetters.length === 0) return prevLetters; // Safety check
+      // Cancel any existing auto-advance timer
+      if (gameDesignerAutoAdvanceRef.current) {
+        clearTimeout(gameDesignerAutoAdvanceRef.current);
+        gameDesignerAutoAdvanceRef.current = null;
+      }
+      
+      // Set up the auto-advance timer
+      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
+        // Only proceed if still on Game Designer and still paused
+        if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
+          console.log("AUTO-ADVANCE: Taking action");
           
-          const randomLetter = nonSpaceLetters[Math.floor(Math.random() * nonSpaceLetters.length)];
-          
-          return prevLetters.map(l => {
-            if (l.id === randomLetter.id) {
-              return { ...l, status: 'good' as GameLetterStatus };
-            }
-            return { ...l, status: 'neutral' as GameLetterStatus };
-          });
+          setGameDesignerPaused(false); // Allow transition
+          // activeTitleIndexRef.current should already point to GAME_DESIGNER_TITLE's index.
+          // startGlitchSequence will calculate the next title based on this.
+          console.log(`AUTO-ADVANCE: Triggering transition from Game Designer (current index: ${activeTitleIndexRef.current})`);
+          startGlitchSequence();
         }
-        return prevLetters;
-      });
+      }, 5000);
     }
-  }, [displayedTitle, gameDesignerPaused]);
+    
+    // Always clean up timer when component unmounts or Game Designer is no longer active
+    return () => {
+      if (gameDesignerAutoAdvanceRef.current) {
+        clearTimeout(gameDesignerAutoAdvanceRef.current);
+        gameDesignerAutoAdvanceRef.current = null;
+      }
+    };
+  }, [displayedTitle, gameDesignerPaused, professionalTitles]);
 
   // Update the handleLetterClick function to only start the game when clicking a lit letter
   const handleLetterClick = (letterId: string) => {
@@ -394,50 +406,9 @@ export default function Home() {
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
     
-    // Set up Game Designer auto-advance timeout
-    if (targetTitle === GAME_DESIGNER_TITLE) {
-      setGameDesignerPaused(true);
-      
-      // Schedule auto-advance after a delay if user doesn't interact
-      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
-        // Only auto-advance if we're still on Game Designer and still no gameplay
-        if (displayedTitle === GAME_DESIGNER_TITLE && gameStartTime === null) {
-          console.log("AUTO-ADVANCING: Game Designer title timed out (from startGlitch)");
-          
-          // Force transition to next title
-          const nextTitle = (nextIndex + 1) % professionalTitles.length;
-          const forcedNextTitle = professionalTitles[nextTitle];
-          
-          // Reset game states
-          setGameDesignerPaused(false);
-          setIsGameDesignerAnimating(false);
-          setGameDesignerLetters([]);
-          
-          // Clear timers
-          if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
-          if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
-          
-          // Force advance
-          setDisplayedTitle(forcedNextTitle);
-          activeTitleIndexRef.current = nextTitle;
-          
-          // Set appropriate states for next title
-          if (forcedNextTitle === AUDIO_PROGRAMMER_TITLE) {
-            setIsLetterAnimating(true);
-            const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
-            setAnimatedLetters(lettersAP);
-          } else if (forcedNextTitle === CREATIVE_LEAD_TITLE) {
-            setIsCreativeLeadAnimating(true);
-          } else {
-            setIsGlowing(true);
-            setCurrentGlowClass(GLOW_CLASSES[nextTitle % GLOW_CLASSES.length]);
-          }
-          
-          // Schedule next
-          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 3000);
-        }
-      }, 5000);
-    } else {
+    // Ensure gameDesignerPaused is false if the target is not Game Designer.
+    // If it is Game Designer, it will be set to true after the glitch.
+    if (targetTitle !== GAME_DESIGNER_TITLE) {
       setGameDesignerPaused(false);
     }
     
@@ -465,6 +436,7 @@ export default function Home() {
           glitchSoundRef.current.currentTime = 0;
           isGlitchSoundPlayingRef.current = false;
         }
+        // Play settle sound only if NOT transitioning to Game Designer
         if (settleSoundRef.current && targetTitle !== GAME_DESIGNER_TITLE) {
           settleSoundRef.current.play().catch(error => console.error("Error playing settle sound:", error));
         }
@@ -478,94 +450,98 @@ export default function Home() {
             nextTitleTimeoutRef.current = null;
         }
 
+        // Reset all animation states before setting the active one
+        setIsLetterAnimating(false);
+        setIsCreativeLeadAnimating(false);
+        setIsGameDesignerAnimating(false); // Explicitly set to false before specific title logic
+        // setGameDesignerPaused(false); // This will be set to true specifically for Game Designer if it's the target
+
         if (targetTitle === GAME_DESIGNER_TITLE) {
+          setDisplayedTitle(targetTitle); // Set title *after* glitch
+          setGameDesignerPaused(true); 
           setIsGameDesignerAnimating(true);
           setGameDesignerLetters(
             GAME_DESIGNER_TITLE.split('').map((char, idx) => ({
               char,
               id: `${char}-${idx}`,
               status: 'neutral' as GameLetterStatus,
-              key: `${char}-${idx}-${Date.now()}` // Force re-render if needed, or just use id
+              key: `${char}-${idx}-${Date.now()}`
             }))
           );
-          
-          // Allow manual intervention by not scheduling the next title change
-          // nextTitleTimeoutRef will remain null, keeping us on Game Designer
-          return;
-        } else {
-          // Reset the paused state when moving to a different title
-          setGameDesignerPaused(false);
-          
-          // Continue with existing logic for other titles...
+          // No nextTitleTimeoutRef for Game Designer to pause here; auto-advance useEffect will handle it.
+        } else if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
+          setDisplayedTitle(targetTitle); // Set title *after* glitch
+          setGameDesignerPaused(false); // Ensure GD is not paused
+          setIsLetterAnimating(true);
+          setIsGlowing(false);
+          setCurrentGlowClass('');
+          const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
+          setAnimatedLetters(lettersAP);
 
-          if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
-            setIsLetterAnimating(true);
-            setIsGlowing(false);
-            setCurrentGlowClass('');
-            const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
-            setAnimatedLetters(lettersAP);
+          lettersAP.forEach((_, letterIndex) => {
+            const punchTimeout = setTimeout(() => {
+              setAnimatedLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, hasPunched: true } : l));
+              const unpunchTimeout = setTimeout(() => {
+                setAnimatedLetters(prev => prev.map((l,i) => i === letterIndex ? {...l, hasPunched: false} : l));
+              }, 300);
+              letterAnimationTimeoutsRef.current.push(unpunchTimeout);
+            }, letterIndex * 75);
+            letterAnimationTimeoutsRef.current.push(punchTimeout);
+          });
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + (lettersAP.length * 75) + 300);
+        } else if (targetTitle === CREATIVE_LEAD_TITLE) {
+          setDisplayedTitle(targetTitle); // Set title *after* glitch
+          setGameDesignerPaused(false); // Ensure GD is not paused
+          setIsCreativeLeadAnimating(true);
+          setIsGlowing(false);
+          setCurrentGlowClass('');
+          const creativeWordLength = "Creative".length;
+          const lettersCL = CREATIVE_LEAD_TITLE.split('').map((char, index) => {
+            let finalColorForLetter;
+            if (index < creativeWordLength) { // Letters of "Creative"
+              finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+            } else if (char === ' ') {
+              finalColorForLetter = 'transparent';
+            } else { // Letters of "Lead"
+              finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+            }
+            return {
+              char,
+              currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)],
+              finalColor: finalColorForLetter,
+              isSettled: false,
+            };
+          });
+          setCreativeLeadLetters(lettersCL);
 
-            lettersAP.forEach((_, letterIndex) => {
-              const punchTimeout = setTimeout(() => {
-                setAnimatedLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, hasPunched: true } : l));
-                const unpunchTimeout = setTimeout(() => {
-                  setAnimatedLetters(prev => prev.map((l,i) => i === letterIndex ? {...l, hasPunched: false} : l));
-                }, 300);
-                letterAnimationTimeoutsRef.current.push(unpunchTimeout);
-              }, letterIndex * 75);
-              letterAnimationTimeoutsRef.current.push(punchTimeout);
-            });
-            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + (lettersAP.length * 75) + 300);
-          } else if (targetTitle === CREATIVE_LEAD_TITLE) {
-            setIsCreativeLeadAnimating(true);
-            setIsGlowing(false);
-            setCurrentGlowClass('');
-            const creativeWordLength = "Creative".length;
-            const lettersCL = CREATIVE_LEAD_TITLE.split('').map((char, index) => {
-              let finalColorForLetter;
-              if (index < creativeWordLength) { // Letters of "Creative"
-                finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
-              } else if (char === ' ') {
-                finalColorForLetter = 'transparent';
-              } else { // Letters of "Lead"
-                finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+          chaoticColorIntervalRef.current = setInterval(() => {
+            setCreativeLeadLetters(prevLetters => prevLetters.map(l => l.isSettled ? l : { ...l, currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)] }));
+          }, 75);
+
+          settlePhaseStartTimeoutRef.current = setTimeout(() => {
+            if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current); chaoticColorIntervalRef.current = null;
+            lettersCL.forEach((letter, letterIndex) => {
+              if (letter.char === ' ') {
+                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, isSettled: true, currentColor: 'transparent' } : l));
+                return;
               }
-              return {
-                char,
-                currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)],
-                finalColor: finalColorForLetter,
-                isSettled: false,
-              };
+              const settleTimeout = setTimeout(() => {
+                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, currentColor: l.finalColor, isSettled: true } : l));
+              }, letterIndex * 75);
+              creativeLetterSettleTimeoutsRef.current.push(settleTimeout);
             });
-            setCreativeLeadLetters(lettersCL);
-
-            chaoticColorIntervalRef.current = setInterval(() => {
-              setCreativeLeadLetters(prevLetters => prevLetters.map(l => l.isSettled ? l : { ...l, currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)] }));
-            }, 75);
-
-            settlePhaseStartTimeoutRef.current = setTimeout(() => {
-              if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current); chaoticColorIntervalRef.current = null;
-              lettersCL.forEach((letter, letterIndex) => {
-                if (letter.char === ' ') {
-                  setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, isSettled: true, currentColor: 'transparent' } : l));
-                  return;
-                }
-                const settleTimeout = setTimeout(() => {
-                  setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, currentColor: l.finalColor, isSettled: true } : l));
-                }, letterIndex * 75);
-                creativeLetterSettleTimeoutsRef.current.push(settleTimeout);
-              });
-              const totalSettleTime = (lettersCL.length * 75) + 100;
-              nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + totalSettleTime);
-            }, 1200);
-          } else {
-            setIsLetterAnimating(false);
-            setIsCreativeLeadAnimating(false);
-            setIsGameDesignerAnimating(false);
-            setIsGlowing(true);
-            setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
-            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
-          }
+            const totalSettleTime = (lettersCL.length * 75) + 100;
+            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + totalSettleTime);
+          }, 1200);
+        } else { // Default titles (e.g., "Product Director", "Sound Director")
+          setDisplayedTitle(targetTitle); // Set title *after* glitch
+          setGameDesignerPaused(false); // Ensure GD is not paused
+          setIsLetterAnimating(false);
+          setIsCreativeLeadAnimating(false);
+          setIsGameDesignerAnimating(false);
+          setIsGlowing(true);
+          setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
         }
       }
     }, glitchDuration);
@@ -576,19 +552,43 @@ export default function Home() {
   };
 
   const handleMouseLeave = () => {
-    cleanUpTimers(); // This will clear liveGameTimerIntervalRef
+    // If the Game Designer game was won and the winner message is currently showing,
+    // we want to preserve its display and the timeout that will transition away from it.
+    // We should only clear other incidental animation timers.
+    if (professionalTitles[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE && showWinnerMessage) {
+      if (glitchEffectIntervalRef.current) {
+        clearInterval(glitchEffectIntervalRef.current);
+        glitchEffectIntervalRef.current = null;
+      }
+      clearLetterAnimationTimeouts(); // Stop any Audio Programmer letter punches
+      clearCreativeLeadAnimationTimeouts(); // Stop any Creative Lead color cycling
+      
+      // DO NOT call cleanUpTimers() here as it would clear nextTitleTimeoutRef.
+      // DO NOT reset displayedTitle or other Game Designer specific states here.
+      return; // Exit early to let the winner sequence complete.
+    }
+
+    // Standard cleanup for all other scenarios:
+    // - Mouse leave during a normal title display (not Game Designer win).
+    // - Mouse leave during an unfinished/abandoned Game Designer game.
+    // - Mouse leave during other animated titles.
+    cleanUpTimers(); // This will clear nextTitleTimeoutRef, glitchEffectIntervalRef, and all game/animation timers.
+
     const lastSettledTitle = professionalTitles[activeTitleIndexRef.current];
-    setDisplayedTitle(lastSettledTitle);
+    setDisplayedTitle(lastSettledTitle); // Revert to the actual settled title
     setIsGlowing(false);
     setCurrentGlowClass('');
     setIsLetterAnimating(false);
     setIsCreativeLeadAnimating(false);
-    setIsGameDesignerAnimating(false);
+    // isGameDesignerAnimating will be set based on whether lastSettledTitle is GAME_DESIGNER_TITLE below.
+
+    // Reset animation states for specific titles if they were the ones settled on
     if (lastSettledTitle === AUDIO_PROGRAMMER_TITLE) {
       setAnimatedLetters(AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false })));
     } else {
       setAnimatedLetters([]);
     }
+
     if (lastSettledTitle === CREATIVE_LEAD_TITLE) {
       const creativeWordLength = "Creative".length;
       setCreativeLeadLetters(CREATIVE_LEAD_TITLE.split('').map((char, index) => {
@@ -610,13 +610,35 @@ export default function Home() {
     } else {
       setCreativeLeadLetters([]);
     }
+
     if (lastSettledTitle === GAME_DESIGNER_TITLE) {
+      // This case means the mouse left when Game Designer was the settled title,
+      // but NOT during a winner message display (due to the early return above).
+      // So, game was paused or abandoned mid-play.
+      setIsGameDesignerAnimating(true); // Keep interactive styling for Game Designer title
+      setGameDesignerPaused(true);    // Revert to paused state, ready for next interaction or auto-advance
+      setGameDesignerLetters(
+        GAME_DESIGNER_TITLE.split('').map((char, idx) => ({
+          char, id: `${char}-${idx}`, status: 'neutral' as GameLetterStatus, key: `${char}-${idx}-${Date.now()}`
+        }))
+      ); // Reset letters
+      gameWonRef.current = false; // Ensure win flag is false
+      setShowWinnerMessage(false); // Ensure winner message is hidden
+      // Reset game times as the game was abandoned or not completed
+      setGameStartTime(null);
+      setGameEndTime(null);
+      setCurrentGameTime(0);
+    } else {
+      // Settling on a title that is NOT Game Designer.
+      // Ensure all Game Designer specific states are fully reset.
+      setIsGameDesignerAnimating(false);
       setGameDesignerLetters([]);
-      gameWonRef.current = false; // <-- ADDED Reset gameWonRef here too
-    }
-    // Ensure game timer states are reset if mouse leaves, and it wasn't handled by endGameDesignerGame already
-    if (!isGameDesignerAnimating) { // if game wasn't active, ensure these are still reset.
-        setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0);
+      gameWonRef.current = false;
+      setGameDesignerPaused(false);
+      setShowWinnerMessage(false); 
+      setGameStartTime(null); 
+      setGameEndTime(null); 
+      setCurrentGameTime(0);
     }
   };
 
@@ -654,42 +676,6 @@ export default function Home() {
     };
   }, []);
 
-  // Update the auto-advance logic to force the transition
-  useEffect(() => {
-    // When Game Designer title first appears and is in paused state
-    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused && !gameStartTime) {
-      console.log("Game Designer title appeared, setting up auto-advance");
-      
-      // Clear any existing timeout
-      if (gameDesignerAutoAdvanceRef.current) {
-        clearTimeout(gameDesignerAutoAdvanceRef.current);
-      }
-      
-      // Set up new auto-advance
-      gameDesignerAutoAdvanceRef.current = setTimeout(() => {
-        // Only auto-advance if we're still on Game Designer, still paused, and game hasn't started
-        if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused && !gameStartTime) {
-          console.log("AUTO-ADVANCING: Game Designer title timed out (from effect)");
-          // Force next title
-          const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
-          activeTitleIndexRef.current = nextIndex;
-          setGameDesignerPaused(false);
-          startGlitchSequence();
-        }
-      }, 5000);
-    } else if (displayedTitle === GAME_DESIGNER_TITLE && !gameDesignerPaused && gameStartTime) {
-      // Game is now active - cancel any auto-advance
-      if (gameDesignerAutoAdvanceRef.current) {
-        clearTimeout(gameDesignerAutoAdvanceRef.current);
-        gameDesignerAutoAdvanceRef.current = null;
-      }
-    }
-    
-    return () => {
-      // No need to clean up here as it's handled in the main cleanup effect
-    };
-  }, [displayedTitle, gameDesignerPaused, gameStartTime]);
-
   const scrollToTabs = (tabValue: string) => {
     setActiveTab(tabValue);
     
@@ -699,6 +685,31 @@ export default function Home() {
       }, 100);
     }
   };
+
+  // Add the letter highlighting effect back
+  useEffect(() => {
+    // Highlight a random letter when Game Designer title first appears
+    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
+      setGameDesignerLetters(prevLetters => {
+        // Only modify if no letter is already highlighted (prevent re-runs)
+        if (!prevLetters.some(l => l.status === 'good')) {
+          // Choose a random letter to highlight first
+          const nonSpaceLetters = prevLetters.filter(l => l.char !== ' ');
+          if (nonSpaceLetters.length === 0) return prevLetters; // Safety check
+          
+          const randomLetter = nonSpaceLetters[Math.floor(Math.random() * nonSpaceLetters.length)];
+          
+          return prevLetters.map(l => {
+            if (l.id === randomLetter.id) {
+              return { ...l, status: 'good' as GameLetterStatus };
+            }
+            return { ...l, status: 'neutral' as GameLetterStatus };
+          });
+        }
+        return prevLetters;
+      });
+    }
+  }, [displayedTitle, gameDesignerPaused, gameDesignerLetters]);
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
