@@ -56,6 +56,11 @@ export default function Home() {
   const gameRoundTimerRef = useRef<NodeJS.Timeout | null>(null);
   const popSoundRef = useRef<HTMLAudioElement | null>(null); // Sound for letter pop
 
+  // New state for game timer and winner message
+  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
+  const [gameEndTime, setGameEndTime] = useState<number | null>(null);
+  const [showWinnerMessage, setShowWinnerMessage] = useState(false);
+
   // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -116,61 +121,82 @@ export default function Home() {
     clearGameDesignerTimers();
   };
 
-  const endGameDesignerGame = () => {
+  const endGameDesignerGame = (gameWon: boolean = false) => {
     setIsGameDesignerAnimating(false);
-    // Schedule the next title in the main sequence
-    nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1200 + Math.random() * 800); // Short delay before next title
+    if (gameWon) {
+      // gameEndTime should already be set
+      setShowWinnerMessage(true);
+       // Longer delay for winner message, then reset winner message and start next sequence
+      nextTitleTimeoutRef.current = setTimeout(() => {
+        setShowWinnerMessage(false); // Hide winner message before next title
+        setGameStartTime(null); setGameEndTime(null); // Reset for next game
+        startGlitchSequence();
+      }, 2500); // Show winner message for 2.5 seconds
+    } else {
+      // Game ended for other reasons (e.g., mouse leave)
+      setShowWinnerMessage(false);
+      setGameStartTime(null); setGameEndTime(null);
+      nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 800 + Math.random() * 500); 
+    }
   };
 
   const startGameDesignerRound = () => {
     if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
-
     setGameDesignerLetters(prevLetters => {
       const activeLetters = prevLetters.filter(l => l.status !== 'popped');
       if (activeLetters.length === 0) {
-        endGameDesignerGame();
+        // This path should ideally be caught by handleLetterClick setting gameEndTime
+        // but as a fallback, if all letters are popped when a new round starts:
+        if (gameStartTime && !gameEndTime) setGameEndTime(Date.now()); // Set end time if not already set
+        endGameDesignerGame(true); // Pass true for gameWon
         return []; 
       }
-
-      let newLetters = prevLetters.map(l => 
-        l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l
-      );
-      
-      const numGoodTargets = Math.min(activeLetters.length, Math.floor(Math.random() * 2) + 1); 
+      let newLetters = prevLetters.map(l => l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l );
+      const numGoodTargets = Math.min(activeLetters.length, Math.floor(Math.random() * 2) + 1);
       const availableIndices = activeLetters.map(l => newLetters.findIndex(nl => nl.id === l.id)).filter(index => index !== -1);
-      
       for (let i = 0; i < numGoodTargets; i++) {
         if (availableIndices.length === 0) break;
         const randomIndex = Math.floor(Math.random() * availableIndices.length);
         const letterIndexToChange = availableIndices.splice(randomIndex, 1)[0];
-        if (newLetters[letterIndexToChange]) { 
-            newLetters[letterIndexToChange] = { ...newLetters[letterIndexToChange], status: 'good' as GameLetterStatus };
+        if (newLetters[letterIndexToChange]) { newLetters[letterIndexToChange] = { ...newLetters[letterIndexToChange], status: 'good' as GameLetterStatus }; }
+      }
+      return newLetters;
+    });
+    gameRoundTimerRef.current = setTimeout(() => { startGameDesignerRound(); }, 1500 + Math.random() * 500);
+  };
+
+  const handleLetterClick = (letterId: string) => {
+    let gameJustWon = false;
+    setGameDesignerLetters(prevLetters => {
+      let firstPopThisGame = gameStartTime === null;
+      let lettersPoppedCount = 0;
+      const newLetters = prevLetters.map(l => {
+        if (l.id === letterId && l.status === 'good') {
+          if (firstPopThisGame) {
+            setGameStartTime(Date.now());
+            firstPopThisGame = false; // Ensure only set once per game
+          }
+          if (popSoundRef.current) { popSoundRef.current.currentTime = 0; popSoundRef.current.play().catch(e => console.error("Pop sound error", e));}
+          lettersPoppedCount++;
+          return { ...l, status: 'popped' as GameLetterStatus };
+        }
+        if (l.status === 'popped') lettersPoppedCount++;
+        return l;
+      });
+
+      // Check if all letters are popped (excluding spaces if any)
+      const totalGameLetters = newLetters.filter(l => l.char !== ' ').length;
+      if (newLetters.filter(l=> l.status === 'popped' && l.char !== ' ').length === totalGameLetters) {
+        if (!gameEndTime) { // ensure gameEndTime is set only once
+            setGameEndTime(Date.now());
+            gameJustWon = true;
         }
       }
       return newLetters;
     });
 
-    gameRoundTimerRef.current = setTimeout(() => {
-      startGameDesignerRound(); 
-    }, 1500 + Math.random() * 500); 
-  };
-
-  const handleLetterClick = (letterId: string) => {
-    let allPopped = false;
-    setGameDesignerLetters(prevLetters => {
-      const newLetters = prevLetters.map(l => {
-        if (l.id === letterId && l.status === 'good') {
-          if (popSoundRef.current) { popSoundRef.current.currentTime = 0; popSoundRef.current.play().catch(e => console.error("Pop sound error", e));}
-          return { ...l, status: 'popped' as GameLetterStatus };
-        }
-        return l;
-      });
-      allPopped = newLetters.every(l => l.status === 'popped');
-      return newLetters;
-    });
-
-    if (allPopped) {
-      endGameDesignerGame();
+    if (gameJustWon) {
+      endGameDesignerGame(true); // Pass true for gameWon
     }
   };
 
@@ -181,7 +207,9 @@ export default function Home() {
     setAnimatedLetters([]);
     setIsCreativeLeadAnimating(false);
     setCreativeLeadLetters([]);
-    setIsGameDesignerAnimating(false); // Reset Game Designer state
+    setIsGameDesignerAnimating(false); 
+    // Reset game timer state FOR EVERY new title sequence start
+    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null);
     cleanUpTimers(); 
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
@@ -343,6 +371,8 @@ export default function Home() {
     if (lastSettledTitle === GAME_DESIGNER_TITLE) {
       setGameDesignerLetters([]);
     }
+    // Ensure game timer states are reset if mouse leaves, regardless of win or not
+    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null);
   };
 
   useEffect(() => {
@@ -403,18 +433,22 @@ export default function Home() {
             </span>
             <br />
             <span 
-              className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating ? currentGlowClass : ''}`}
+              className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating && !showWinnerMessage ? currentGlowClass : ''}`}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} // minHeight for layout stability 
             >
-              {isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
+              {showWinnerMessage && gameStartTime && gameEndTime ? (
+                <span className="text-2xl md:text-3xl winner-message">
+                  Winner! Time: {((gameEndTime - gameStartTime) / 1000).toFixed(2)}s
+                </span>
+              ) : isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
                 gameDesignerLetters.map((letter) => (
                   <span 
                     key={letter.key} 
                     onClick={() => handleLetterClick(letter.id)}
                     className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
-                    style={{ display: letter.status === 'popped' && letter.char !== ' ' ? 'inline-block' : 'inline-block' }} // Keep inline-block for animation, space handled below
+                    style={{ display: letter.char === ' ' ? 'inline' : 'inline-block' }} // Spaces normal, letters inline-block for transforms
                   >
                     {letter.char === ' ' ? '\u00A0' : letter.char}
                   </span>
