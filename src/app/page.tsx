@@ -30,6 +30,11 @@ export default function Home() {
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Audio refs
+  const glitchSoundRef = useRef<HTMLAudioElement | null>(null);
+  const settleSoundRef = useRef<HTMLAudioElement | null>(null);
+  const isGlitchSoundPlayingRef = useRef(false);
+
   const generateGlitchedText = (text: string, intensity: number = 0.7) => {
     const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
     return text
@@ -43,6 +48,12 @@ export default function Home() {
     if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
     glitchEffectIntervalRef.current = null;
     nextTitleTimeoutRef.current = null;
+
+    if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
+      glitchSoundRef.current.pause();
+      glitchSoundRef.current.currentTime = 0;
+      isGlitchSoundPlayingRef.current = false;
+    }
   };
 
   const startGlitchSequence = () => {
@@ -58,11 +69,24 @@ export default function Home() {
 
     glitchEffectIntervalRef.current = setInterval(() => {
       if (iterations < maxIterations) {
+        if (glitchSoundRef.current && !isGlitchSoundPlayingRef.current) {
+          glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
+          isGlitchSoundPlayingRef.current = true;
+        }
         setDisplayedTitle(generateGlitchedText(targetTitle));
         iterations++;
       } else {
         if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
+        
+        if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
+          glitchSoundRef.current.pause();
+          glitchSoundRef.current.currentTime = 0;
+          isGlitchSoundPlayingRef.current = false;
+        }
+        if (settleSoundRef.current) {
+          settleSoundRef.current.play().catch(error => console.error("Error playing settle sound:", error));
+        }
         
         setDisplayedTitle(targetTitle); 
         activeTitleIndexRef.current = nextIndex; // Update the settled title index
@@ -87,9 +111,30 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Audio setup
+    glitchSoundRef.current = new Audio('/sounds/glitch_loop.wav'); 
+    if (glitchSoundRef.current) {
+      glitchSoundRef.current.loop = true;
+    }
+    settleSoundRef.current = new Audio('/sounds/land.wav');
+
     // Cleanup function to be called when the component unmounts
     return () => {
       cleanUpTimers();
+      // Optional: more robust cleanup for audio elements on unmount
+      if (glitchSoundRef.current) {
+        glitchSoundRef.current.pause();
+        // Detach source to help browser release memory. Modern browsers are good, but can be a safety measure.
+        // @ts-ignore
+        glitchSoundRef.current.srcObject = null; 
+        glitchSoundRef.current.src = '';
+      }
+      if (settleSoundRef.current) {
+        settleSoundRef.current.pause();
+        // @ts-ignore
+        settleSoundRef.current.srcObject = null;
+        settleSoundRef.current.src = '';
+      }
     };
   }, []); // Empty dependency array ensures this runs only on mount and unmount
   // --- End of Glitch Text Effect Code ---
