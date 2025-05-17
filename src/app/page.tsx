@@ -555,62 +555,75 @@ export default function Home() {
               className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating && !showWinnerMessage ? currentGlowClass : ''}`}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} // minHeight for layout stability 
+              style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} 
             >
-              {/* PRIORITY 1: Winner Message */}
-              {showWinnerMessage && gameStartTime && gameEndTime ? (
-                <span className="text-2xl md:text-3xl winner-message">
-                  Winner! Time: {((gameEndTime - gameStartTime) / 1000).toFixed(2)}s
-                </span>
-              ) 
-              /* PRIORITY 2: Game Designer Game Active */
-              : isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
-                <>
-                  {gameDesignerLetters.map((letter) => (
-                    <span 
-                      key={letter.key} 
-                      onClick={() => handleLetterClick(letter.id)}
-                      className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
-                      style={{ display: letter.char === ' ' ? 'inline' : 'inline-block' }} // Spaces normal, letters inline-block for transforms
-                    >
-                      {letter.char === ' ' ? '\u00A0' : letter.char}
-                    </span>
-                  ))}
-                  {gameStartTime && !showWinnerMessage && (
-                    <div className="live-game-timer text-sm md:text-base mt-2">
-                      Time: {currentGameTime.toFixed(1)}s
+              {/* Consistent positioning wrapper */}
+              <div className="relative flex flex-col items-center justify-center">
+                {/* PRIORITY 1: Winner Message */}
+                {showWinnerMessage && gameStartTime && gameEndTime ? (
+                  <span className="text-2xl md:text-3xl winner-message">
+                    Winner! Time: {((gameEndTime - gameStartTime) / 1000).toFixed(2)}s
+                  </span>
+                ) 
+                /* PRIORITY 2: Game Designer Game Active */
+                : isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
+                  <div className="flex flex-col items-center">
+                    <div>
+                      {gameDesignerLetters.map((letter) => (
+                        <span 
+                          key={letter.key} 
+                          onClick={() => handleLetterClick(letter.id)}
+                          className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
+                          style={{ display: letter.char === ' ' ? 'inline' : 'inline-block' }}
+                        >
+                          {letter.char === ' ' ? '\u00A0' : letter.char}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                </>
-              )
-              /* PRIORITY 3: Creative Lead Animation */
-              : isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
-                creativeLeadLetters.map((letter, index) => (
-                  <span key={index} style={{ color: letter.currentColor, display: 'inline-block', transition: 'color 0.1s ease-in-out' }}>
-                    {letter.char === ' ' ? '\u00A0' : letter.char}
-                  </span>
-                ))
-              )
-              /* PRIORITY 4: Audio Programmer Animation */
-              : isLetterAnimating && displayedTitle === AUDIO_PROGRAMMER_TITLE ? (
-                animatedLetters.map((letter, index) => (
-                  <span 
-                    key={index} 
-                    className={`inline-block ${letter.isVisible ? 'letter-visible' : 'letter-hidden'} ${letter.hasPunched ? 'letter-animate-punch' : ''}`}
-                    style={{ animationDelay: `${index * 0}s` }} 
-                  >
-                    {letter.char === ' ' ? '\u00A0' : letter.char} 
-                  </span>
-                ))
-              )
-              /* DEFAULT: Render the glitched/normal title */
-              : (
-                displayedTitle.split('').map((char, index) => (
-                  <span key={index} style={{ display: char === ' ' ? 'inline' : 'inline-block' }}>
-                    {char === ' ' ? '\u00A0' : char}
-                  </span>
-                ))
-              )}
+                  </div>
+                )
+                /* PRIORITY 3: Creative Lead Animation */
+                : isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
+                  <div>
+                    {creativeLeadLetters.map((letter, index) => (
+                      <span key={index} style={{ color: letter.currentColor, display: 'inline-block', transition: 'color 0.1s ease-in-out' }}>
+                        {letter.char === ' ' ? '\u00A0' : letter.char}
+                      </span>
+                    ))}
+                  </div>
+                )
+                /* PRIORITY 4: Audio Programmer Animation */
+                : isLetterAnimating && displayedTitle === AUDIO_PROGRAMMER_TITLE ? (
+                  <div>
+                    {animatedLetters.map((letter, index) => (
+                      <span 
+                        key={index} 
+                        className={`inline-block ${letter.isVisible ? 'letter-visible' : 'letter-hidden'} ${letter.hasPunched ? 'letter-animate-punch' : ''}`}
+                        style={{ animationDelay: `${index * 0}s` }} 
+                      >
+                        {letter.char === ' ' ? '\u00A0' : letter.char} 
+                      </span>
+                    ))}
+                  </div>
+                )
+                /* DEFAULT: Render the glitched/normal title */
+                : (
+                  <div>
+                    {displayedTitle.split('').map((char, index) => (
+                      <span key={index} style={{ display: char === ' ' ? 'inline' : 'inline-block' }}>
+                        {char === ' ' ? '\u00A0' : char}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Timer that appears below without shifting content */}
+                {isGameDesignerAnimating && gameStartTime && !showWinnerMessage && (
+                  <div className="absolute -bottom-6 left-0 right-0 text-center text-sm md:text-base">
+                    Time: {currentGameTime.toFixed(1)}s
+                  </div>
+                )}
+              </div>
             </span>
           </h1>
 
