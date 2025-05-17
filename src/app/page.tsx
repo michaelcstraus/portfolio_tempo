@@ -57,9 +57,8 @@ export default function Home() {
   };
 
   const startGlitchSequence = () => {
-    cleanUpTimers(); // Clear any existing timers before starting a new sequence
+    cleanUpTimers();
 
-    // Determine the next title index based on the last settled title
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
     
@@ -70,6 +69,18 @@ export default function Home() {
     glitchEffectIntervalRef.current = setInterval(() => {
       if (iterations < maxIterations) {
         if (glitchSoundRef.current && !isGlitchSoundPlayingRef.current) {
+          if (glitchSoundRef.current.duration && Number.isFinite(glitchSoundRef.current.duration)) {
+            try {
+              const randomStartTime = Math.random() * glitchSoundRef.current.duration;
+              glitchSoundRef.current.currentTime = randomStartTime;
+            } catch (error) {
+              console.error("Error setting random currentTime for glitch sound:", error);
+              if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0;
+            }
+          } else {
+            if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0;
+          }
+          
           glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
           isGlitchSoundPlayingRef.current = true;
         }
@@ -89,61 +100,53 @@ export default function Home() {
         }
         
         setDisplayedTitle(targetTitle); 
-        activeTitleIndexRef.current = nextIndex; // Update the settled title index
+        activeTitleIndexRef.current = nextIndex;
         
-        // Schedule the next glitch in the sequence
         nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000); 
       }
     }, glitchDuration);
   };
 
   const handleMouseEnter = () => {
-    // Sequence always starts/resumes by trying to glitch to the *next* title
-    // after the one currently stored in activeTitleIndexRef.
     startGlitchSequence();
   };
 
   const handleMouseLeave = () => {
     cleanUpTimers();
-    // Ensure the displayed title is the last one that was cleanly settled.
-    // This handles cases where mouse leaves mid-glitch.
     setDisplayedTitle(professionalTitles[activeTitleIndexRef.current]);
   };
 
   useEffect(() => {
-    // Audio setup
     glitchSoundRef.current = new Audio('/sounds/glitch_loop.wav'); 
     if (glitchSoundRef.current) {
       glitchSoundRef.current.loop = true;
     }
     settleSoundRef.current = new Audio('/sounds/land.wav');
 
-    // Cleanup function to be called when the component unmounts
     return () => {
       cleanUpTimers();
-      // Optional: more robust cleanup for audio elements on unmount
       if (glitchSoundRef.current) {
         glitchSoundRef.current.pause();
-        // Detach source to help browser release memory. Modern browsers are good, but can be a safety measure.
-        // @ts-ignore
-        glitchSoundRef.current.srcObject = null; 
-        glitchSoundRef.current.src = '';
+        if (glitchSoundRef.current) {
+          glitchSoundRef.current.srcObject = null; 
+          glitchSoundRef.current.src = '';
+        }
       }
       if (settleSoundRef.current) {
         settleSoundRef.current.pause();
-        // @ts-ignore
-        settleSoundRef.current.srcObject = null;
-        settleSoundRef.current.src = '';
+        if (settleSoundRef.current) {
+          settleSoundRef.current.srcObject = null;
+          settleSoundRef.current.src = '';
+        }
       }
     };
-  }, []); // Empty dependency array ensures this runs only on mount and unmount
+  }, []);
   // --- End of Glitch Text Effect Code ---
 
   const scrollToTabs = (tabValue: string) => {
     setActiveTab(tabValue);
     
     if (tabsRef.current) {
-      // Add a small delay to ensure the DOM has updated
       setTimeout(() => {
         tabsRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
