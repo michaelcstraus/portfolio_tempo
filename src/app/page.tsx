@@ -48,8 +48,9 @@ export default function Home() {
   const startGlitchSequence = () => {
     cleanUpTimers(); // Clear any existing timers before starting a new sequence
 
-    activeTitleIndexRef.current = (activeTitleIndexRef.current + 1) % professionalTitles.length;
-    const targetTitle = professionalTitles[activeTitleIndexRef.current];
+    // Determine the next title index based on the last settled title
+    const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
+    const targetTitle = professionalTitles[nextIndex];
     
     let iterations = 0;
     const maxIterations = 5 + Math.floor(Math.random() * 5); 
@@ -62,27 +63,27 @@ export default function Home() {
       } else {
         if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
-        setDisplayedTitle(targetTitle); 
         
+        setDisplayedTitle(targetTitle); 
+        activeTitleIndexRef.current = nextIndex; // Update the settled title index
+        
+        // Schedule the next glitch in the sequence
         nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000); 
       }
     }, glitchDuration);
   };
 
   const handleMouseEnter = () => {
-    const currentlyVisibleCleanTitleIndex = professionalTitles.indexOf(displayedTitle);
-    if (currentlyVisibleCleanTitleIndex !== -1) {
-        activeTitleIndexRef.current = currentlyVisibleCleanTitleIndex;
-    }
-    // If displayedTitle is glitched, activeTitleIndexRef already points to the last target clean title.
-    // So, the (activeTitleIndexRef.current + 1) in startGlitchSequence will correctly pick the next one.
+    // Sequence always starts/resumes by trying to glitch to the *next* title
+    // after the one currently stored in activeTitleIndexRef.
     startGlitchSequence();
   };
 
   const handleMouseLeave = () => {
     cleanUpTimers();
-    activeTitleIndexRef.current = 0; 
-    setDisplayedTitle(professionalTitles[0]); 
+    // Ensure the displayed title is the last one that was cleanly settled.
+    // This handles cases where mouse leaves mid-glitch.
+    setDisplayedTitle(professionalTitles[activeTitleIndexRef.current]);
   };
 
   useEffect(() => {
