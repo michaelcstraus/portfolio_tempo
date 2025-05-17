@@ -18,11 +18,11 @@ export default function Home() {
 
   // --- Start of Glitch Text Effect Code ---
   const professionalTitles = [
-    "Game Director / Designer",
+    "Product Director",
+    "Game Designer",
     "Audio Programmer",
-    "Innovation Lead",
-    "Creative Technologist",
-    "Technical Sound Designer",
+    "Creative Lead",
+    "Sound Director",
   ];
 
   const [displayedTitle, setDisplayedTitle] = useState(professionalTitles[0]);
