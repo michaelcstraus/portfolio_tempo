@@ -346,12 +346,39 @@ export default function Home() {
       gameDesignerAutoAdvanceRef.current = setTimeout(() => {
         // Only auto-advance if we're still on Game Designer and still no gameplay
         if (displayedTitle === GAME_DESIGNER_TITLE && gameStartTime === null) {
-          console.log("AUTO-ADVANCING: Game Designer title timed out");
-          // Force next title
+          console.log("AUTO-ADVANCING: Game Designer title timed out (from startGlitch)");
+          
+          // Force transition to next title
           const nextTitle = (nextIndex + 1) % professionalTitles.length;
-          activeTitleIndexRef.current = nextTitle;
+          const forcedNextTitle = professionalTitles[nextTitle];
+          
+          // Reset game states
           setGameDesignerPaused(false);
-          startGlitchSequence();
+          setIsGameDesignerAnimating(false);
+          setGameDesignerLetters([]);
+          
+          // Clear timers
+          if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
+          if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
+          
+          // Force advance
+          setDisplayedTitle(forcedNextTitle);
+          activeTitleIndexRef.current = nextTitle;
+          
+          // Set appropriate states for next title
+          if (forcedNextTitle === AUDIO_PROGRAMMER_TITLE) {
+            setIsLetterAnimating(true);
+            const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
+            setAnimatedLetters(lettersAP);
+          } else if (forcedNextTitle === CREATIVE_LEAD_TITLE) {
+            setIsCreativeLeadAnimating(true);
+          } else {
+            setIsGlowing(true);
+            setCurrentGlowClass(GLOW_CLASSES[nextTitle % GLOW_CLASSES.length]);
+          }
+          
+          // Schedule next
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 3000);
         }
       }, 5000);
     } else {
@@ -571,7 +598,7 @@ export default function Home() {
     };
   }, []);
 
-  // Add this effect to handle initial Game Designer title display
+  // Update the auto-advance logic to force the transition
   useEffect(() => {
     // When Game Designer title first appears and is in paused state
     if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused && !gameStartTime) {
@@ -587,11 +614,38 @@ export default function Home() {
         // Only auto-advance if we're still on Game Designer and still no gameplay
         if (displayedTitle === GAME_DESIGNER_TITLE && !gameStartTime) {
           console.log("AUTO-ADVANCING: Game Designer title timed out (from effect)");
-          // Force next title
+          
+          // Force transition to next title
           const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
-          activeTitleIndexRef.current = nextIndex;
+          const nextTitle = professionalTitles[nextIndex];
+          
+          // Reset all game states
           setGameDesignerPaused(false);
-          startGlitchSequence();
+          setIsGameDesignerAnimating(false);
+          setGameDesignerLetters([]);
+          
+          // Clear any existing timers
+          if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
+          if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
+          
+          // Force advance to next title directly
+          setDisplayedTitle(nextTitle);
+          activeTitleIndexRef.current = nextIndex;
+          
+          // If the next title is not Game Designer, set up appropriate states
+          if (nextTitle === AUDIO_PROGRAMMER_TITLE) {
+            setIsLetterAnimating(true);
+            const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
+            setAnimatedLetters(lettersAP);
+          } else if (nextTitle === CREATIVE_LEAD_TITLE) {
+            setIsCreativeLeadAnimating(true);
+          } else {
+            setIsGlowing(true);
+            setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
+          }
+          
+          // Schedule next transition
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 3000);
         }
       }, 5000);
     }
