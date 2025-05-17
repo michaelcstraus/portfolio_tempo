@@ -231,6 +231,32 @@ export default function Home() {
     }
   }, [gameEndTime, gameStartTime]); // Dependencies
 
+  // New useEffect to start the game designer round only when letters are ready
+  useEffect(() => {
+    if (isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE) {
+      // Only proceed if no game round is currently scheduled by its own timer
+      if (!gameRoundTimerRef.current) { 
+        // Ensure letters are populated and not all are already popped (e.g., from a quick re-entry)
+        if (gameDesignerLetters.length > 0 && gameDesignerLetters.some(l => l.status !== 'popped')) {
+          startGameDesignerRound();
+        }
+      }
+    }
+
+    // Cleanup function for this effect
+    return () => {
+      // If the effect's conditions are no longer met (e.g., title changes or animation stops for GD),
+      // ensure its specific round timer is cleared.
+      // This check is to ensure we only clear if we're exiting the GD state that this effect instance might have managed.
+      if (!(isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE)) {
+        if (gameRoundTimerRef.current) {
+          clearTimeout(gameRoundTimerRef.current);
+          gameRoundTimerRef.current = null;
+        }
+      }
+    };
+  }, [isGameDesignerAnimating, displayedTitle, gameDesignerLetters]); // Dependencies
+
   const startGlitchSequence = () => {
     setIsGlowing(false);
     setCurrentGlowClass('');
@@ -276,6 +302,12 @@ export default function Home() {
         activeTitleIndexRef.current = nextIndex;
         setDisplayedTitle(targetTitle);
 
+        // Defensive clear: Ensure no old timer makes us switch away from the landed title prematurely
+        if (nextTitleTimeoutRef.current) {
+            clearTimeout(nextTitleTimeoutRef.current);
+            nextTitleTimeoutRef.current = null;
+        }
+
         if (targetTitle === GAME_DESIGNER_TITLE) {
           setIsGameDesignerAnimating(true);
           setGameDesignerLetters(
@@ -286,7 +318,6 @@ export default function Home() {
               key: `${char}-${idx}-${Date.now()}` // Force re-render if needed, or just use id
             }))
           );
-          startGameDesignerRound();
         } else if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
           setIsLetterAnimating(true);
           setIsGlowing(false);
