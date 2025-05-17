@@ -804,7 +804,10 @@ export default function Home() {
                 
                 {/* Timer that appears below without shifting content */}
                 {isGameDesignerAnimating && gameStartTime && !showWinnerMessage && (
-                  <div className="absolute -bottom-6 left-0 right-0 text-center text-sm md:text-base">
+                  <div 
+                    className="absolute -bottom-6 left-0 right-0 text-center text-sm md:text-base"
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
                     Time: {currentGameTime.toFixed(1)}s
                   </div>
                 )}
