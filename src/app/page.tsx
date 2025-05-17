@@ -55,11 +55,16 @@ export default function Home() {
   const [gameDesignerLetters, setGameDesignerLetters] = useState<GameLetter[]>([]);
   const gameRoundTimerRef = useRef<NodeJS.Timeout | null>(null);
   const popSoundRef = useRef<HTMLAudioElement | null>(null); // Sound for letter pop
+  const gameWonRef = useRef(false); // <-- ADDED
 
   // New state for game timer and winner message
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [gameEndTime, setGameEndTime] = useState<number | null>(null);
   const [showWinnerMessage, setShowWinnerMessage] = useState(false);
+
+  // New state and ref for live game timer
+  const [currentGameTime, setCurrentGameTime] = useState(0);
+  const liveGameTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -103,6 +108,8 @@ export default function Home() {
   const clearGameDesignerTimers = () => {
     if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
     gameRoundTimerRef.current = null;
+    if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current); // Clear live timer
+    liveGameTimerIntervalRef.current = null;
   };
 
   const cleanUpTimers = () => {
@@ -123,19 +130,25 @@ export default function Home() {
 
   const endGameDesignerGame = (gameWon: boolean = false) => {
     setIsGameDesignerAnimating(false);
+    if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current); // Stop live timer
+    liveGameTimerIntervalRef.current = null;
+    
+    // Ensure the game's own round timer is stopped
+    if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
+    gameRoundTimerRef.current = null;
+
+    // setCurrentGameTime(0); // Reset live display, or let winner message show final from gameEndTime
+
     if (gameWon) {
-      // gameEndTime should already be set
       setShowWinnerMessage(true);
-       // Longer delay for winner message, then reset winner message and start next sequence
       nextTitleTimeoutRef.current = setTimeout(() => {
-        setShowWinnerMessage(false); // Hide winner message before next title
-        setGameStartTime(null); setGameEndTime(null); // Reset for next game
+        setShowWinnerMessage(false); 
+        setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset all game times
         startGlitchSequence();
-      }, 2500); // Show winner message for 2.5 seconds
+      }, 2500); 
     } else {
-      // Game ended for other reasons (e.g., mouse leave)
       setShowWinnerMessage(false);
-      setGameStartTime(null); setGameEndTime(null);
+      setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset all game times
       nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 800 + Math.random() * 500); 
     }
   };
@@ -145,10 +158,11 @@ export default function Home() {
     setGameDesignerLetters(prevLetters => {
       const activeLetters = prevLetters.filter(l => l.status !== 'popped');
       if (activeLetters.length === 0) {
-        // This path should ideally be caught by handleLetterClick setting gameEndTime
-        // but as a fallback, if all letters are popped when a new round starts:
-        if (gameStartTime && !gameEndTime) setGameEndTime(Date.now()); // Set end time if not already set
-        endGameDesignerGame(true); // Pass true for gameWon
+        if (gameStartTime && !gameEndTime) { // Ensure gameEndTime is set if somehow missed
+            setGameEndTime(Date.now());
+            gameWonRef.current = true; // Signal win to useEffect
+        }
+        // endGameDesignerGame(true) will be called by useEffect if gameEndTime is set
         return []; 
       }
       let newLetters = prevLetters.map(l => l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l );
@@ -166,39 +180,56 @@ export default function Home() {
   };
 
   const handleLetterClick = (letterId: string) => {
-    let gameJustWon = false;
+    const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
+
+    if (letterBeforeClick && letterBeforeClick.status === 'good' && gameStartTime === null) {
+        setGameStartTime(Date.now());
+        setCurrentGameTime(0);
+        if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current);
+        liveGameTimerIntervalRef.current = setInterval(() => {
+            setGameStartTime(prevStartTime => {
+                if (prevStartTime) {
+                    setCurrentGameTime((Date.now() - prevStartTime) / 1000);
+                }
+                return prevStartTime;
+            });
+        }, 100);
+    }
+
     setGameDesignerLetters(prevLetters => {
-      let firstPopThisGame = gameStartTime === null;
-      let lettersPoppedCount = 0;
       const newLetters = prevLetters.map(l => {
         if (l.id === letterId && l.status === 'good') {
-          if (firstPopThisGame) {
-            setGameStartTime(Date.now());
-            firstPopThisGame = false; // Ensure only set once per game
-          }
           if (popSoundRef.current) { popSoundRef.current.currentTime = 0; popSoundRef.current.play().catch(e => console.error("Pop sound error", e));}
-          lettersPoppedCount++;
           return { ...l, status: 'popped' as GameLetterStatus };
         }
-        if (l.status === 'popped') lettersPoppedCount++;
         return l;
       });
-
-      // Check if all letters are popped (excluding spaces if any)
       const totalGameLetters = newLetters.filter(l => l.char !== ' ').length;
-      if (newLetters.filter(l=> l.status === 'popped' && l.char !== ' ').length === totalGameLetters) {
-        if (!gameEndTime) { // ensure gameEndTime is set only once
-            setGameEndTime(Date.now());
-            gameJustWon = true;
+      const poppedGameLetters = newLetters.filter(l=> l.status === 'popped' && l.char !== ' ').length;
+
+      if (poppedGameLetters === totalGameLetters && totalGameLetters > 0) {
+        // Check gameEndTime state from the closure of setGameDesignerLetters's parent scope.
+        // If gameEndTime is not already set (by another rapid click or event)
+        if (!prevLetters.some(l => l.status === 'popped' && newLetters.find(nl => nl.id === l.id)?.status !== 'popped')) { // Ensure this is the click that wins
+            const currentGlobalGameEndTime = gameEndTime; // This captures gameEndTime from the outer scope, might be stale
+            // We set the ref and call setGameEndTime. useEffect will use the updated state.
+            if (!currentGlobalGameEndTime) { // only if not already set by a concurrent event.
+                gameWonRef.current = true; 
+                setGameEndTime(Date.now()); // This will trigger the useEffect
+            }
         }
       }
       return newLetters;
     });
-
-    if (gameJustWon) {
-      endGameDesignerGame(true); // Pass true for gameWon
-    }
+    // Removed direct call to endGameDesignerGame(true) if gameJustWon
   };
+
+  useEffect(() => {
+    if (gameWonRef.current && gameEndTime && gameStartTime) {
+      endGameDesignerGame(true);
+      gameWonRef.current = false; // Reset flag after handling the win
+    }
+  }, [gameEndTime, gameStartTime]); // Dependencies
 
   const startGlitchSequence = () => {
     setIsGlowing(false);
@@ -208,9 +239,8 @@ export default function Home() {
     setIsCreativeLeadAnimating(false);
     setCreativeLeadLetters([]);
     setIsGameDesignerAnimating(false); 
-    // Reset game timer state FOR EVERY new title sequence start
-    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null);
-    cleanUpTimers(); 
+    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset live timer value too
+    cleanUpTimers(); // This will clear liveGameTimerIntervalRef via clearGameDesignerTimers
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
@@ -334,7 +364,7 @@ export default function Home() {
   };
 
   const handleMouseLeave = () => {
-    cleanUpTimers();
+    cleanUpTimers(); // This will clear liveGameTimerIntervalRef
     const lastSettledTitle = professionalTitles[activeTitleIndexRef.current];
     setDisplayedTitle(lastSettledTitle);
     setIsGlowing(false);
@@ -370,9 +400,12 @@ export default function Home() {
     }
     if (lastSettledTitle === GAME_DESIGNER_TITLE) {
       setGameDesignerLetters([]);
+      gameWonRef.current = false; // <-- ADDED Reset gameWonRef here too
     }
-    // Ensure game timer states are reset if mouse leaves, regardless of win or not
-    setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null);
+    // Ensure game timer states are reset if mouse leaves, and it wasn't handled by endGameDesignerGame already
+    if (!isGameDesignerAnimating) { // if game wasn't active, ensure these are still reset.
+        setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0);
+    }
   };
 
   useEffect(() => {
@@ -438,39 +471,59 @@ export default function Home() {
               onMouseLeave={handleMouseLeave}
               style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} // minHeight for layout stability 
             >
+              {/* PRIORITY 1: Winner Message */}
               {showWinnerMessage && gameStartTime && gameEndTime ? (
                 <span className="text-2xl md:text-3xl winner-message">
                   Winner! Time: {((gameEndTime - gameStartTime) / 1000).toFixed(2)}s
                 </span>
-              ) : isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
-                gameDesignerLetters.map((letter) => (
-                  <span 
-                    key={letter.key} 
-                    onClick={() => handleLetterClick(letter.id)}
-                    className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
-                    style={{ display: letter.char === ' ' ? 'inline' : 'inline-block' }} // Spaces normal, letters inline-block for transforms
-                  >
-                    {letter.char === ' ' ? '\u00A0' : letter.char}
-                  </span>
-                ))
-              ) : isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
+              ) 
+              /* PRIORITY 2: Game Designer Game Active */
+              : isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
+                <>
+                  {gameDesignerLetters.map((letter) => (
+                    <span 
+                      key={letter.key} 
+                      onClick={() => handleLetterClick(letter.id)}
+                      className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
+                      style={{ display: letter.char === ' ' ? 'inline' : 'inline-block' }} // Spaces normal, letters inline-block for transforms
+                    >
+                      {letter.char === ' ' ? '\u00A0' : letter.char}
+                    </span>
+                  ))}
+                  {gameStartTime && !showWinnerMessage && (
+                    <div className="live-game-timer text-sm md:text-base mt-2">
+                      Time: {currentGameTime.toFixed(1)}s
+                    </div>
+                  )}
+                </>
+              )
+              /* PRIORITY 3: Creative Lead Animation */
+              : isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
                 creativeLeadLetters.map((letter, index) => (
                   <span key={index} style={{ color: letter.currentColor, display: 'inline-block', transition: 'color 0.1s ease-in-out' }}>
                     {letter.char === ' ' ? '\u00A0' : letter.char}
                   </span>
                 ))
-              ) : isLetterAnimating && displayedTitle === AUDIO_PROGRAMMER_TITLE ? (
+              )
+              /* PRIORITY 4: Audio Programmer Animation */
+              : isLetterAnimating && displayedTitle === AUDIO_PROGRAMMER_TITLE ? (
                 animatedLetters.map((letter, index) => (
                   <span 
                     key={index} 
                     className={`inline-block ${letter.isVisible ? 'letter-visible' : 'letter-hidden'} ${letter.hasPunched ? 'letter-animate-punch' : ''}`}
-                    style={{ animationDelay: `${index * 0}s` }} // animation-delay on .letter-animate-punch if needed for staggered css animation, but JS handles stagger of hasPunched
+                    style={{ animationDelay: `${index * 0}s` }} 
                   >
-                    {letter.char === ' ' ? '\u00A0' : letter.char} {/* Non-breaking space for spaces */}
+                    {letter.char === ' ' ? '\u00A0' : letter.char} 
                   </span>
                 ))
-              ) : (
-                displayedTitle
+              )
+              /* DEFAULT: Render the glitched/normal title */
+              : (
+                displayedTitle.split('').map((char, index) => (
+                  <span key={index} style={{ display: char === ' ' ? 'inline' : 'inline-block' }}>
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                ))
               )}
             </span>
           </h1>
