@@ -66,6 +66,9 @@ export default function Home() {
   const [currentGameTime, setCurrentGameTime] = useState(0);
   const liveGameTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Add a state to track if we're paused on the Game Designer title
+  const [gameDesignerPaused, setGameDesignerPaused] = useState(false);
+
   // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -180,6 +183,34 @@ export default function Home() {
   };
 
   const handleLetterClick = (letterId: string) => {
+    // Start the game if we're paused on the Game Designer title
+    if (gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE) {
+      setGameDesignerPaused(false);
+      
+      // Initialize the game by highlighting some letters
+      setGameStartTime(Date.now());
+      setCurrentGameTime(0);
+      
+      // Start the timer
+      if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current);
+      liveGameTimerIntervalRef.current = setInterval(() => {
+        setGameStartTime(prevStartTime => {
+          if (prevStartTime) {
+            setCurrentGameTime((Date.now() - prevStartTime) / 1000);
+          }
+          return prevStartTime;
+        });
+      }, 100);
+      
+      // Start the game rounds with a small delay
+      setTimeout(() => {
+        startGameDesignerRound();
+      }, 300);
+      
+      return;
+    }
+    
+    // Rest of the existing click handler for active gameplay
     const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
 
     if (letterBeforeClick && letterBeforeClick.status === 'good' && gameStartTime === null) {
@@ -264,12 +295,25 @@ export default function Home() {
     setAnimatedLetters([]);
     setIsCreativeLeadAnimating(false);
     setCreativeLeadLetters([]);
+    
+    // Don't reset if we're already in Game Designer mode and it's paused for interaction
+    if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
+      return;
+    }
+    
     setIsGameDesignerAnimating(false); 
     setShowWinnerMessage(false); setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset live timer value too
     cleanUpTimers(); // This will clear liveGameTimerIntervalRef via clearGameDesignerTimers
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
+    
+    // If we're transitioning to Game Designer, set the paused state to true
+    if (targetTitle === GAME_DESIGNER_TITLE) {
+      setGameDesignerPaused(true);
+    } else {
+      setGameDesignerPaused(false);
+    }
     
     let iterations = 0;
     const maxIterations = 5 + Math.floor(Math.random() * 5);
@@ -318,73 +362,84 @@ export default function Home() {
               key: `${char}-${idx}-${Date.now()}` // Force re-render if needed, or just use id
             }))
           );
-        } else if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
-          setIsLetterAnimating(true);
-          setIsGlowing(false);
-          setCurrentGlowClass('');
-          const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
-          setAnimatedLetters(lettersAP);
-
-          lettersAP.forEach((_, letterIndex) => {
-            const punchTimeout = setTimeout(() => {
-              setAnimatedLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, hasPunched: true } : l));
-              const unpunchTimeout = setTimeout(() => {
-                setAnimatedLetters(prev => prev.map((l,i) => i === letterIndex ? {...l, hasPunched: false} : l));
-              }, 300);
-              letterAnimationTimeoutsRef.current.push(unpunchTimeout);
-            }, letterIndex * 75);
-            letterAnimationTimeoutsRef.current.push(punchTimeout);
-          });
-          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + (lettersAP.length * 75) + 300);
-        } else if (targetTitle === CREATIVE_LEAD_TITLE) {
-          setIsCreativeLeadAnimating(true);
-          setIsGlowing(false);
-          setCurrentGlowClass('');
-          const creativeWordLength = "Creative".length;
-          const lettersCL = CREATIVE_LEAD_TITLE.split('').map((char, index) => {
-            let finalColorForLetter;
-            if (index < creativeWordLength) { // Letters of "Creative"
-              finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
-            } else if (char === ' ') {
-              finalColorForLetter = 'transparent';
-            } else { // Letters of "Lead"
-              finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
-            }
-            return {
-              char,
-              currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)],
-              finalColor: finalColorForLetter,
-              isSettled: false,
-            };
-          });
-          setCreativeLeadLetters(lettersCL);
-
-          chaoticColorIntervalRef.current = setInterval(() => {
-            setCreativeLeadLetters(prevLetters => prevLetters.map(l => l.isSettled ? l : { ...l, currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)] }));
-          }, 75);
-
-          settlePhaseStartTimeoutRef.current = setTimeout(() => {
-            if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current); chaoticColorIntervalRef.current = null;
-            lettersCL.forEach((letter, letterIndex) => {
-              if (letter.char === ' ') {
-                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, isSettled: true, currentColor: 'transparent' } : l));
-                return;
-              }
-              const settleTimeout = setTimeout(() => {
-                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, currentColor: l.finalColor, isSettled: true } : l));
-              }, letterIndex * 75);
-              creativeLetterSettleTimeoutsRef.current.push(settleTimeout);
-            });
-            const totalSettleTime = (lettersCL.length * 75) + 100;
-            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + totalSettleTime);
-          }, 1200);
+          
+          // Allow manual intervention by not scheduling the next title change
+          // nextTitleTimeoutRef will remain null, keeping us on Game Designer
+          return;
         } else {
-          setIsLetterAnimating(false);
-          setIsCreativeLeadAnimating(false);
-          setIsGameDesignerAnimating(false);
-          setIsGlowing(true);
-          setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
-          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
+          // Reset the paused state when moving to a different title
+          setGameDesignerPaused(false);
+          
+          // Continue with existing logic for other titles...
+
+          if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
+            setIsLetterAnimating(true);
+            setIsGlowing(false);
+            setCurrentGlowClass('');
+            const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
+            setAnimatedLetters(lettersAP);
+
+            lettersAP.forEach((_, letterIndex) => {
+              const punchTimeout = setTimeout(() => {
+                setAnimatedLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, hasPunched: true } : l));
+                const unpunchTimeout = setTimeout(() => {
+                  setAnimatedLetters(prev => prev.map((l,i) => i === letterIndex ? {...l, hasPunched: false} : l));
+                }, 300);
+                letterAnimationTimeoutsRef.current.push(unpunchTimeout);
+              }, letterIndex * 75);
+              letterAnimationTimeoutsRef.current.push(punchTimeout);
+            });
+            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + (lettersAP.length * 75) + 300);
+          } else if (targetTitle === CREATIVE_LEAD_TITLE) {
+            setIsCreativeLeadAnimating(true);
+            setIsGlowing(false);
+            setCurrentGlowClass('');
+            const creativeWordLength = "Creative".length;
+            const lettersCL = CREATIVE_LEAD_TITLE.split('').map((char, index) => {
+              let finalColorForLetter;
+              if (index < creativeWordLength) { // Letters of "Creative"
+                finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+              } else if (char === ' ') {
+                finalColorForLetter = 'transparent';
+              } else { // Letters of "Lead"
+                finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+              }
+              return {
+                char,
+                currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)],
+                finalColor: finalColorForLetter,
+                isSettled: false,
+              };
+            });
+            setCreativeLeadLetters(lettersCL);
+
+            chaoticColorIntervalRef.current = setInterval(() => {
+              setCreativeLeadLetters(prevLetters => prevLetters.map(l => l.isSettled ? l : { ...l, currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)] }));
+            }, 75);
+
+            settlePhaseStartTimeoutRef.current = setTimeout(() => {
+              if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current); chaoticColorIntervalRef.current = null;
+              lettersCL.forEach((letter, letterIndex) => {
+                if (letter.char === ' ') {
+                  setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, isSettled: true, currentColor: 'transparent' } : l));
+                  return;
+                }
+                const settleTimeout = setTimeout(() => {
+                  setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, currentColor: l.finalColor, isSettled: true } : l));
+                }, letterIndex * 75);
+                creativeLetterSettleTimeoutsRef.current.push(settleTimeout);
+              });
+              const totalSettleTime = (lettersCL.length * 75) + 100;
+              nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + totalSettleTime);
+            }, 1200);
+          } else {
+            setIsLetterAnimating(false);
+            setIsCreativeLeadAnimating(false);
+            setIsGameDesignerAnimating(false);
+            setIsGlowing(true);
+            setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
+            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
+          }
         }
       }
     }, glitchDuration);
