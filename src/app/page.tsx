@@ -12,21 +12,42 @@ import MusicSection from "@/components/MusicSection";
 import ContactSection from "@/components/ContactSection";
 import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide-react";
 
+const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
+const CREATIVE_LEAD_TITLE = "Creative Lead";
+
+const CHAOTIC_COLORS = ['#FF1493', '#FF8C00', '#ADFF2F', '#00BFFF', '#BA55D3', '#FFD700'];
+const HARMONIOUS_PALETTE_CL = ['#ec4899', '#22d3ee', '#a855f7', '#ffffff']; // Pink, Cyan, Purple, White
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  // --- Start of Glitch Text Effect Code ---
   const professionalTitles = [
     "Product Director",
     "Game Designer",
-    "Audio Programmer",
-    "Creative Lead",
+    AUDIO_PROGRAMMER_TITLE,
+    CREATIVE_LEAD_TITLE,
     "Sound Director",
   ];
 
   const [displayedTitle, setDisplayedTitle] = useState(professionalTitles[0]);
+  const [isGlowing, setIsGlowing] = useState(false);
+  const [currentGlowClass, setCurrentGlowClass] = useState('');
   const activeTitleIndexRef = useRef(0);
+  
+  // State for letter animation
+  const [isLetterAnimating, setIsLetterAnimating] = useState(false);
+  const [animatedLetters, setAnimatedLetters] = useState<Array<{ char: string; isVisible: boolean; hasPunched: boolean }>>([]);
+  const letterAnimationTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // State for Creative Lead animation
+  const [isCreativeLeadAnimating, setIsCreativeLeadAnimating] = useState(false);
+  const [creativeLeadLetters, setCreativeLeadLetters] = useState<Array<{ char: string; currentColor: string; finalColor: string; isSettled: boolean }>>([]);
+  const chaoticColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const settlePhaseStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const creativeLetterSettleTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -35,12 +56,34 @@ export default function Home() {
   const settleSoundRef = useRef<HTMLAudioElement | null>(null);
   const isGlitchSoundPlayingRef = useRef(false);
 
+  const GLOW_CLASSES = [
+    'text-glow-style-1',
+    'text-glow-style-2',
+    'text-glow-style-3',
+    'text-glow-style-4',
+    'text-glow-style-5',
+  ];
+
   const generateGlitchedText = (text: string, intensity: number = 0.7) => {
     const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
     return text
       .split("")
       .map(char => (char !== ' ' && Math.random() > (1 - intensity) ? chars[Math.floor(Math.random() * chars.length)] : char))
       .join("");
+  };
+
+  const clearLetterAnimationTimeouts = () => {
+    letterAnimationTimeoutsRef.current.forEach(clearTimeout);
+    letterAnimationTimeoutsRef.current = [];
+  };
+
+  const clearCreativeLeadAnimationTimeouts = () => {
+    if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current);
+    if (settlePhaseStartTimeoutRef.current) clearTimeout(settlePhaseStartTimeoutRef.current);
+    creativeLetterSettleTimeoutsRef.current.forEach(clearTimeout);
+    chaoticColorIntervalRef.current = null;
+    settlePhaseStartTimeoutRef.current = null;
+    creativeLetterSettleTimeoutsRef.current = [];
   };
 
   const cleanUpTimers = () => {
@@ -54,33 +97,32 @@ export default function Home() {
       glitchSoundRef.current.currentTime = 0;
       isGlitchSoundPlayingRef.current = false;
     }
+    clearLetterAnimationTimeouts();
+    clearCreativeLeadAnimationTimeouts();
   };
 
   const startGlitchSequence = () => {
-    cleanUpTimers();
+    setIsGlowing(false);
+    setCurrentGlowClass('');
+    setIsLetterAnimating(false);
+    setAnimatedLetters([]);
+    setIsCreativeLeadAnimating(false);
+    setCreativeLeadLetters([]);
+    cleanUpTimers(); 
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
     const targetTitle = professionalTitles[nextIndex];
     
     let iterations = 0;
-    const maxIterations = 5 + Math.floor(Math.random() * 5); 
-    const glitchDuration = 50; 
+    const maxIterations = 5 + Math.floor(Math.random() * 5);
+    const glitchDuration = 50;
 
     glitchEffectIntervalRef.current = setInterval(() => {
       if (iterations < maxIterations) {
         if (glitchSoundRef.current && !isGlitchSoundPlayingRef.current) {
           if (glitchSoundRef.current.duration && Number.isFinite(glitchSoundRef.current.duration)) {
-            try {
-              const randomStartTime = Math.random() * glitchSoundRef.current.duration;
-              glitchSoundRef.current.currentTime = randomStartTime;
-            } catch (error) {
-              console.error("Error setting random currentTime for glitch sound:", error);
-              if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0;
-            }
-          } else {
-            if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0;
-          }
-          
+            try { const randomStartTime = Math.random() * glitchSoundRef.current.duration; glitchSoundRef.current.currentTime = randomStartTime; } catch (error) { console.error("Error setting random currentTime for glitch sound:", error); if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
+          } else { if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
           glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
           isGlitchSoundPlayingRef.current = true;
         }
@@ -99,10 +141,76 @@ export default function Home() {
           settleSoundRef.current.play().catch(error => console.error("Error playing settle sound:", error));
         }
         
-        setDisplayedTitle(targetTitle); 
         activeTitleIndexRef.current = nextIndex;
-        
-        nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000); 
+        setDisplayedTitle(targetTitle);
+
+        if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
+          setIsLetterAnimating(true);
+          setIsGlowing(false);
+          setCurrentGlowClass('');
+          const lettersAP = AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false }));
+          setAnimatedLetters(lettersAP);
+
+          lettersAP.forEach((_, letterIndex) => {
+            const punchTimeout = setTimeout(() => {
+              setAnimatedLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, hasPunched: true } : l));
+              const unpunchTimeout = setTimeout(() => {
+                setAnimatedLetters(prev => prev.map((l,i) => i === letterIndex ? {...l, hasPunched: false} : l));
+              }, 300);
+              letterAnimationTimeoutsRef.current.push(unpunchTimeout);
+            }, letterIndex * 75);
+            letterAnimationTimeoutsRef.current.push(punchTimeout);
+          });
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + (lettersAP.length * 75) + 300);
+        } else if (targetTitle === CREATIVE_LEAD_TITLE) {
+          setIsCreativeLeadAnimating(true);
+          setIsGlowing(false);
+          setCurrentGlowClass('');
+          const creativeWordLength = "Creative".length;
+          const lettersCL = CREATIVE_LEAD_TITLE.split('').map((char, index) => {
+            let finalColorForLetter;
+            if (index < creativeWordLength) { // Letters of "Creative"
+              finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+            } else if (char === ' ') {
+              finalColorForLetter = 'transparent';
+            } else { // Letters of "Lead"
+              finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+            }
+            return {
+              char,
+              currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)],
+              finalColor: finalColorForLetter,
+              isSettled: false,
+            };
+          });
+          setCreativeLeadLetters(lettersCL);
+
+          chaoticColorIntervalRef.current = setInterval(() => {
+            setCreativeLeadLetters(prevLetters => prevLetters.map(l => l.isSettled ? l : { ...l, currentColor: CHAOTIC_COLORS[Math.floor(Math.random() * CHAOTIC_COLORS.length)] }));
+          }, 75);
+
+          settlePhaseStartTimeoutRef.current = setTimeout(() => {
+            if (chaoticColorIntervalRef.current) clearInterval(chaoticColorIntervalRef.current); chaoticColorIntervalRef.current = null;
+            lettersCL.forEach((letter, letterIndex) => {
+              if (letter.char === ' ') {
+                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, isSettled: true, currentColor: 'transparent' } : l));
+                return;
+              }
+              const settleTimeout = setTimeout(() => {
+                setCreativeLeadLetters(prev => prev.map((l, i) => i === letterIndex ? { ...l, currentColor: l.finalColor, isSettled: true } : l));
+              }, letterIndex * 75);
+              creativeLetterSettleTimeoutsRef.current.push(settleTimeout);
+            });
+            const totalSettleTime = (lettersCL.length * 75) + 100;
+            nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000 + totalSettleTime);
+          }, 1200);
+        } else {
+          setIsLetterAnimating(false);
+          setIsCreativeLeadAnimating(false);
+          setIsGlowing(true);
+          setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
+          nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
+        }
       }
     }, glitchDuration);
   };
@@ -113,7 +221,38 @@ export default function Home() {
 
   const handleMouseLeave = () => {
     cleanUpTimers();
-    setDisplayedTitle(professionalTitles[activeTitleIndexRef.current]);
+    const lastSettledTitle = professionalTitles[activeTitleIndexRef.current];
+    setDisplayedTitle(lastSettledTitle);
+    setIsGlowing(false);
+    setCurrentGlowClass('');
+    setIsLetterAnimating(false);
+    setIsCreativeLeadAnimating(false);
+    if (lastSettledTitle === AUDIO_PROGRAMMER_TITLE) {
+      setAnimatedLetters(AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false })));
+    } else {
+      setAnimatedLetters([]);
+    }
+    if (lastSettledTitle === CREATIVE_LEAD_TITLE) {
+      const creativeWordLength = "Creative".length;
+      setCreativeLeadLetters(CREATIVE_LEAD_TITLE.split('').map((char, index) => {
+        let finalColorForLetter;
+        if (index < creativeWordLength) {
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+        } else if (char === ' ') {
+          finalColorForLetter = 'transparent';
+        } else {
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+        }
+        return {
+          char,
+          currentColor: finalColorForLetter,
+          finalColor: finalColorForLetter,
+          isSettled: true,
+        };
+      }));
+    } else {
+      setCreativeLeadLetters([]);
+    }
   };
 
   useEffect(() => {
@@ -166,18 +305,35 @@ export default function Home() {
             </span>
             <br />
             <span 
-              className="text-white"
+              className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating ? currentGlowClass : ''}`}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              style={{ display: 'inline-block', cursor: 'default' }} 
+              style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} // minHeight for layout stability 
             >
-              {displayedTitle}
+              {isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
+                creativeLeadLetters.map((letter, index) => (
+                  <span key={index} style={{ color: letter.currentColor, display: 'inline-block', transition: 'color 0.1s ease-in-out' }}>
+                    {letter.char === ' ' ? '\u00A0' : letter.char}
+                  </span>
+                ))
+              ) : isLetterAnimating && displayedTitle === AUDIO_PROGRAMMER_TITLE ? (
+                animatedLetters.map((letter, index) => (
+                  <span 
+                    key={index} 
+                    className={`inline-block ${letter.isVisible ? 'letter-visible' : 'letter-hidden'} ${letter.hasPunched ? 'letter-animate-punch' : ''}`}
+                    style={{ animationDelay: `${index * 0}s` }} // animation-delay on .letter-animate-punch if needed for staggered css animation, but JS handles stagger of hasPunched
+                  >
+                    {letter.char === ' ' ? '\u00A0' : letter.char} {/* Non-breaking space for spaces */}
+                  </span>
+                ))
+              ) : (
+                displayedTitle
+              )}
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
-            Crafting immersive experiences through innovative design,
-            and engaging mechanics. 
+            Blending technical expertise with creative vision
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mt-8">

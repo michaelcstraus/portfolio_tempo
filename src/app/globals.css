@@ -67,3 +67,81 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Renamed and kept as Style 1 */
+.text-glow-style-1 {
+  animation: glow-animation-style-1 1.8s ease-in-out infinite alternate;
+}
+@keyframes glow-animation-style-1 {
+  0% { text-shadow: 0 0 1px #fff, 0 0 2px #ec4899, 0 0 3px #ec4899; } /* Pink */
+  100% { text-shadow: 0 0 1px #fff, 0 0 2px #22d3ee, 0 0 4px #22d3ee; } /* Cyan */
+}
+
+/* Style 2: Lime / Yellow */
+.text-glow-style-2 {
+  animation: glow-animation-style-2 1.8s ease-in-out infinite alternate;
+}
+@keyframes glow-animation-style-2 {
+  0% { text-shadow: 0 0 1px #fff, 0 0 2px #a3e635, 0 0 3px #a3e635; } /* Lime */
+  100% { text-shadow: 0 0 1px #fff, 0 0 2px #facc15, 0 0 4px #facc15; } /* Yellow */
+}
+
+/* Style 3: Orange / Indigo */
+.text-glow-style-3 {
+  animation: glow-animation-style-3 1.8s ease-in-out infinite alternate;
+}
+@keyframes glow-animation-style-3 {
+  0% { text-shadow: 0 0 1px #fff, 0 0 2px #f97316, 0 0 3px #f97316; } /* Orange */
+  100% { text-shadow: 0 0 1px #fff, 0 0 2px #6366f1, 0 0 4px #6366f1; } /* Indigo */
+}
+
+/* Style 4: Sky Blue / Whiteish */
+.text-glow-style-4 {
+  animation: glow-animation-style-4 1.8s ease-in-out infinite alternate;
+}
+@keyframes glow-animation-style-4 {
+  0% { text-shadow: 0 0 1px #e0e7ff, 0 0 2px #38bdf8, 0 0 3px #38bdf8; } /* Sky Blue */
+  100% { text-shadow: 0 0 1px #fff, 0 0 2px #e0f2fe, 0 0 4px #e0f2fe; } /* Light Sky/White */
+}
+
+/* Style 5: Fuchsia / Emerald */
+.text-glow-style-5 {
+  animation: glow-animation-style-5 1.8s ease-in-out infinite alternate;
+}
+@keyframes glow-animation-style-5 {
+  0% { text-shadow: 0 0 1px #fff, 0 0 2px #d946ef, 0 0 3px #d946ef; } /* Fuchsia */
+  100% { text-shadow: 0 0 1px #fff, 0 0 2px #10b981, 0 0 4px #10b981; } /* Emerald */
+}
+
+/* Letter Scale Punch Animation */
+.letter-animate-punch {
+  display: inline-block; /* Important for transform to work as expected */
+  animation: scale-punch-animation 0.3s ease-out forwards;
+}
+
+@keyframes scale-punch-animation {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Optional: Initial state for letters before they animate */
+.letter-hidden {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.letter-visible {
+  opacity: 1;
+  transform: scale(1);
+}

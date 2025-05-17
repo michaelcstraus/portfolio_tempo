@@ -128,11 +128,10 @@ const SkillsDisplay = ({
       <div className="container px-4 md:px-6">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Skills & Experience
+            Technical Skills, Design Expertise & Professional Experience
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            My expertise spans game design, development, and creative direction
-            with a focus on creating engaging player experiences.
+            My expertise spans game design, audio programming, and development, with a focus on innovation and creating engaging player experiences.
           </p>
         </div>
         
