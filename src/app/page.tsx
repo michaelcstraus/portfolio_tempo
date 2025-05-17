@@ -14,6 +14,7 @@ import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide
 
 const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
+const GAME_DESIGNER_TITLE = "Game Designer";
 
 const CHAOTIC_COLORS = ['#FF1493', '#FF8C00', '#ADFF2F', '#00BFFF', '#BA55D3', '#FFD700'];
 const HARMONIOUS_PALETTE_CL = ['#ec4899', '#22d3ee', '#a855f7', '#ffffff']; // Pink, Cyan, Purple, White
@@ -24,7 +25,7 @@ export default function Home() {
 
   const professionalTitles = [
     "Product Director",
-    "Game Designer",
+    GAME_DESIGNER_TITLE,
     AUDIO_PROGRAMMER_TITLE,
     CREATIVE_LEAD_TITLE,
     "Sound Director",
@@ -46,6 +47,14 @@ export default function Home() {
   const chaoticColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const settlePhaseStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const creativeLetterSettleTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  // State for Game Designer game
+  const [isGameDesignerAnimating, setIsGameDesignerAnimating] = useState(false);
+  type GameLetterStatus = 'neutral' | 'good' | 'popped';
+  type GameLetter = { char: string; id: string; status: GameLetterStatus; key: string };
+  const [gameDesignerLetters, setGameDesignerLetters] = useState<GameLetter[]>([]);
+  const gameRoundTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const popSoundRef = useRef<HTMLAudioElement | null>(null); // Sound for letter pop
 
   // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -86,6 +95,11 @@ export default function Home() {
     creativeLetterSettleTimeoutsRef.current = [];
   };
 
+  const clearGameDesignerTimers = () => {
+    if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
+    gameRoundTimerRef.current = null;
+  };
+
   const cleanUpTimers = () => {
     if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
     if (nextTitleTimeoutRef.current) clearTimeout(nextTitleTimeoutRef.current);
@@ -99,6 +113,65 @@ export default function Home() {
     }
     clearLetterAnimationTimeouts();
     clearCreativeLeadAnimationTimeouts();
+    clearGameDesignerTimers();
+  };
+
+  const endGameDesignerGame = () => {
+    setIsGameDesignerAnimating(false);
+    // Schedule the next title in the main sequence
+    nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1200 + Math.random() * 800); // Short delay before next title
+  };
+
+  const startGameDesignerRound = () => {
+    if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
+
+    setGameDesignerLetters(prevLetters => {
+      const activeLetters = prevLetters.filter(l => l.status !== 'popped');
+      if (activeLetters.length === 0) {
+        endGameDesignerGame();
+        return []; 
+      }
+
+      let newLetters = prevLetters.map(l => 
+        l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l
+      );
+      
+      const numGoodTargets = Math.min(activeLetters.length, Math.floor(Math.random() * 2) + 1); 
+      const availableIndices = activeLetters.map(l => newLetters.findIndex(nl => nl.id === l.id)).filter(index => index !== -1);
+      
+      for (let i = 0; i < numGoodTargets; i++) {
+        if (availableIndices.length === 0) break;
+        const randomIndex = Math.floor(Math.random() * availableIndices.length);
+        const letterIndexToChange = availableIndices.splice(randomIndex, 1)[0];
+        if (newLetters[letterIndexToChange]) { 
+            newLetters[letterIndexToChange] = { ...newLetters[letterIndexToChange], status: 'good' as GameLetterStatus };
+        }
+      }
+      return newLetters;
+    });
+
+    gameRoundTimerRef.current = setTimeout(() => {
+      startGameDesignerRound(); 
+    }, 1500 + Math.random() * 500); 
+  };
+
+  const handleLetterClick = (letterId: string) => {
+    let allPopped = false;
+    setGameDesignerLetters(prevLetters => {
+      const newLetters = prevLetters.map(l => {
+        if (l.id === letterId && l.status === 'good') {
+          if (popSoundRef.current) { popSoundRef.current.currentTime = 0; popSoundRef.current.play().catch(e => console.error("Pop sound error", e));}
+          return { ...l, status: 'popped' as GameLetterStatus };
+        }
+        return l;
+      });
+      allPopped = newLetters.every(l => l.status === 'popped');
+      return newLetters;
+    });
+
+    if (allPopped) {
+      endGameDesignerGame();
+    }
   };
 
   const startGlitchSequence = () => {
@@ -108,6 +181,7 @@ export default function Home() {
     setAnimatedLetters([]);
     setIsCreativeLeadAnimating(false);
     setCreativeLeadLetters([]);
+    setIsGameDesignerAnimating(false); // Reset Game Designer state
     cleanUpTimers(); 
 
     const nextIndex = (activeTitleIndexRef.current + 1) % professionalTitles.length;
@@ -137,14 +211,25 @@ export default function Home() {
           glitchSoundRef.current.currentTime = 0;
           isGlitchSoundPlayingRef.current = false;
         }
-        if (settleSoundRef.current) {
+        if (settleSoundRef.current && targetTitle !== GAME_DESIGNER_TITLE) {
           settleSoundRef.current.play().catch(error => console.error("Error playing settle sound:", error));
         }
         
         activeTitleIndexRef.current = nextIndex;
         setDisplayedTitle(targetTitle);
 
-        if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
+        if (targetTitle === GAME_DESIGNER_TITLE) {
+          setIsGameDesignerAnimating(true);
+          setGameDesignerLetters(
+            GAME_DESIGNER_TITLE.split('').map((char, idx) => ({
+              char,
+              id: `${char}-${idx}`,
+              status: 'neutral' as GameLetterStatus,
+              key: `${char}-${idx}-${Date.now()}` // Force re-render if needed, or just use id
+            }))
+          );
+          startGameDesignerRound();
+        } else if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
           setIsLetterAnimating(true);
           setIsGlowing(false);
           setCurrentGlowClass('');
@@ -207,6 +292,7 @@ export default function Home() {
         } else {
           setIsLetterAnimating(false);
           setIsCreativeLeadAnimating(false);
+          setIsGameDesignerAnimating(false);
           setIsGlowing(true);
           setCurrentGlowClass(GLOW_CLASSES[nextIndex % GLOW_CLASSES.length]);
           nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 1500 + Math.random() * 1000);
@@ -227,6 +313,7 @@ export default function Home() {
     setCurrentGlowClass('');
     setIsLetterAnimating(false);
     setIsCreativeLeadAnimating(false);
+    setIsGameDesignerAnimating(false);
     if (lastSettledTitle === AUDIO_PROGRAMMER_TITLE) {
       setAnimatedLetters(AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false })));
     } else {
@@ -253,6 +340,9 @@ export default function Home() {
     } else {
       setCreativeLeadLetters([]);
     }
+    if (lastSettledTitle === GAME_DESIGNER_TITLE) {
+      setGameDesignerLetters([]);
+    }
   };
 
   useEffect(() => {
@@ -261,6 +351,7 @@ export default function Home() {
       glitchSoundRef.current.loop = true;
     }
     settleSoundRef.current = new Audio('/sounds/land.wav');
+    popSoundRef.current = new Audio('/sounds/pop.wav');
 
     return () => {
       cleanUpTimers();
@@ -276,6 +367,13 @@ export default function Home() {
         if (settleSoundRef.current) {
           settleSoundRef.current.srcObject = null;
           settleSoundRef.current.src = '';
+        }
+      }
+      if (popSoundRef.current) {
+        popSoundRef.current.pause();
+        if (popSoundRef.current) {
+          popSoundRef.current.srcObject = null;
+          popSoundRef.current.src = '';
         }
       }
     };
@@ -305,12 +403,23 @@ export default function Home() {
             </span>
             <br />
             <span 
-              className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating ? currentGlowClass : ''}`}
+              className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating ? currentGlowClass : ''}`}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} // minHeight for layout stability 
             >
-              {isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
+              {isGameDesignerAnimating && displayedTitle === GAME_DESIGNER_TITLE ? (
+                gameDesignerLetters.map((letter) => (
+                  <span 
+                    key={letter.key} 
+                    onClick={() => handleLetterClick(letter.id)}
+                    className={`letter-game-clickable ${letter.status === 'good' ? 'letter-game-target-good' : letter.status === 'popped' ? 'letter-pop-out' : 'letter-game-neutral'}`}
+                    style={{ display: letter.status === 'popped' && letter.char !== ' ' ? 'inline-block' : 'inline-block' }} // Keep inline-block for animation, space handled below
+                  >
+                    {letter.char === ' ' ? '\u00A0' : letter.char}
+                  </span>
+                ))
+              ) : isCreativeLeadAnimating && displayedTitle === CREATIVE_LEAD_TITLE ? (
                 creativeLeadLetters.map((letter, index) => (
                   <span key={index} style={{ color: letter.currentColor, display: 'inline-block', transition: 'color 0.1s ease-in-out' }}>
                     {letter.char === ' ' ? '\u00A0' : letter.char}

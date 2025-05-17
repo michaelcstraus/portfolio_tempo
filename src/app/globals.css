@@ -145,3 +145,53 @@
   opacity: 1;
   transform: scale(1);
 }
+
+/* Game Designer - Whac-A-Mole Styles */
+.letter-game-clickable {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection during clicks */
+  transition: transform 0.1s ease-out, background-color 0.1s ease-out, color 0.1s ease-out;
+  padding: 0 0.05em; /* Small padding so background color is more visible */
+  border-radius: 3px;
+}
+
+.letter-game-target-good {
+  background-color: #86efac; /* Tailwind green-300 */
+  color: #15803d; /* Tailwind green-700 */
+  transform: scale(1.15);
+  box-shadow: 0 0 8px #86efac;
+}
+
+/* Optional: Style for when a target is missed or turns neutral */
+.letter-game-neutral {
+  background-color: transparent; /* Or a subtle default highlight */
+  transform: scale(1);
+}
+
+.letter-pop-out {
+  animation: pop-out-animation 0.4s ease-out forwards;
+}
+
+@keyframes pop-out-animation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(15deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.1) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* To visually hide popped letters if they still occupy space */
+.letter-popped-hidden {
+  opacity: 0;
+  pointer-events: none; /* No longer clickable */
+  /* We might not need this if we filter out popped letters from render, 
+     or if pop-out-animation 'forwards' effectively hides it. 
+     But good to have if layout issues arise. */
+}
