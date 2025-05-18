@@ -61,11 +61,11 @@ export default function MusicSection({
             Music Portfolio
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            A selection of my favorite music projects that I've worked on over the years.
+            My journey into game design started with a deep love for music and audio. Over the years, I’ve worked as a recording and performing artist, mixed and mastered records, crafted sound design for games, and even taught audio production at the college level. I’ve helped design studio spaces, built dynamic music systems, and collaborated on projects that shaped my creative process.
             <br />
             <br />
+            The playlist below features some of my favorite personal music projects and bands I’ve been part of—each track represents a piece of my path. I played bass in all of them, and on various songs I also wrote, arranged, recorded, or mixed the material.
 
-            I played bass on all of them. Some I mixed, Some I produced, Some I recorded, some I arranged. 
           </p>
         </div>
 
