@@ -817,6 +817,7 @@ export default function Home() {
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
             Blending technical expertise with creative vision
+
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mt-8">
