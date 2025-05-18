@@ -124,99 +124,97 @@ const SkillsDisplay = ({
   }, [skills]);
 
   return (
-    <div className="w-full bg-background">
-      <div className="container px-4 md:px-6">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-            Technical Skills, Design Expertise & Professional Experience
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            My expertise spans game design, audio programming, and development, with a focus on innovation and creating engaging player experiences.
-          </p>
-        </div>
-        
-        <Tabs defaultValue="all" className="w-full">
-          <div className="flex justify-center mb-8">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {categories.map((category) => (
-                <TabsTrigger
-                  key={category.id}
-                  value={category.id}
-                  className="flex items-center gap-2"
-                >
-                  {category.icon}
-                  <span className="hidden md:inline">{category.name}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-
-          {categories.map((category) => (
-            <TabsContent
-              key={category.id}
-              value={category.id}
-              className="space-y-8"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {animatedSkills
-                  .filter(
-                    (skill) =>
-                      category.id === "all" || skill.category === category.id,
-                  )
-                  .map((skill, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">{skill.name}</h3>
-                        <span className="text-sm text-muted-foreground">
-                          {skill.level}%
-                        </span>
-                      </div>
-                      <Progress
-                        value={skill.level}
-                        className="h-2 bg-muted transition-all duration-1000 ease-in-out"
-                      />
-                    </div>
-                  ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        <div className="mt-20">
-          <h3 className="text-2xl font-bold mb-8 text-center">
-            Professional Experience
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {experiences.map((exp, index) => (
-              <Card
-                key={index}
-                className="bg-card hover:shadow-lg transition-shadow duration-300"
+    <div className="w-full">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+          Technical Skills, Design Expertise & Professional Experience
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          My expertise spans game design, audio programming, and development, with a focus on innovation and creating engaging player experiences.
+        </p>
+      </div>
+      
+      <Tabs defaultValue="all" className="w-full">
+        <div className="flex justify-center mb-8">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {categories.map((category) => (
+              <TabsTrigger
+                key={category.id}
+                value={category.id}
+                className="flex items-center gap-2"
               >
-                <CardHeader>
-                  <CardTitle className="flex flex-col">
-                    <span className="text-xl">{exp.title}</span>
-                    <span className="text-sm text-muted-foreground mt-1">
-                      {exp.company} | {exp.period}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-4 text-sm">{exp.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {exp.skills.map((skill, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="secondary"
-                        className="bg-secondary/50"
-                      >
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                {category.icon}
+                <span className="hidden md:inline">{category.name}</span>
+              </TabsTrigger>
             ))}
-          </div>
+          </TabsList>
+        </div>
+
+        {categories.map((category) => (
+          <TabsContent
+            key={category.id}
+            value={category.id}
+            className="space-y-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {animatedSkills
+                .filter(
+                  (skill) =>
+                    category.id === "all" || skill.category === category.id,
+                )
+                .map((skill, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium">{skill.name}</h3>
+                      <span className="text-sm text-muted-foreground">
+                        {skill.level}%
+                      </span>
+                    </div>
+                    <Progress
+                      value={skill.level}
+                      className="h-2 bg-muted transition-all duration-1000 ease-in-out"
+                    />
+                  </div>
+                ))}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      <div className="mt-20">
+        <h3 className="text-2xl font-bold mb-8 text-center">
+          Professional Experience
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {experiences.map((exp, index) => (
+            <Card
+              key={index}
+              className="bg-card hover:shadow-lg transition-shadow duration-300"
+            >
+              <CardHeader>
+                <CardTitle className="flex flex-col">
+                  <span className="text-xl">{exp.title}</span>
+                  <span className="text-sm text-muted-foreground mt-1">
+                    {exp.company} | {exp.period}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-sm">{exp.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {exp.skills.map((skill, idx) => (
+                    <Badge
+                      key={idx}
+                      variant="secondary"
+                      className="bg-secondary/50"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </div>

@@ -1,0 +1,12 @@
+/* Add this to the end of your global.css file */
+
+/* Override default TabsContent component to ensure consistent width */
+.TabsContent-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+[data-state="active"][role="tabpanel"] {
+  width: 100% !important;
+  max-width: 100% !important;
+} 

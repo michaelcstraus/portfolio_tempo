@@ -159,20 +159,22 @@ export default function Home() {
   const startGameDesignerRound = () => {
     if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
     setGameDesignerLetters(prevLetters => {
-      const activeLetters = prevLetters.filter(l => l.status !== 'popped');
+      const activeLetters = prevLetters.filter(l => l.status !== 'popped' && l.char !== ' ');
       if (activeLetters.length === 0) {
-        if (gameStartTime && !gameEndTime) { // Ensure gameEndTime is set if somehow missed
+        if (gameStartTime && !gameEndTime) {
           setGameEndTime(Date.now());
-          gameWonRef.current = true; // Signal win to useEffect
+          gameWonRef.current = true;
         }
-        // endGameDesignerGame(true) will be called by useEffect if gameEndTime is set
-        return []; 
+        return prevLetters;
       }
       
-      // Reset all letters to neutral first
-      let newLetters = prevLetters.map(l => l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l );
+      // Reset all non-space letters to neutral first
+      let newLetters = prevLetters.map(l => {
+        if (l.char === ' ') return l; // Keep spaces as is
+        return l.status === 'good' ? { ...l, status: 'neutral' as GameLetterStatus } : l;
+      });
       
-      // Ensure at least 1 letter is highlighted
+      // Ensure at least 1 letter is highlighted from non-space, non-popped letters
       const numGoodTargets = Math.max(1, Math.min(activeLetters.length, Math.floor(Math.random() * 2) + 1));
       const availableIndices = activeLetters.map(l => newLetters.findIndex(nl => nl.id === l.id)).filter(index => index !== -1);
       
@@ -180,19 +182,19 @@ export default function Home() {
         if (availableIndices.length === 0) break;
         const randomIndex = Math.floor(Math.random() * availableIndices.length);
         const letterIndexToChange = availableIndices.splice(randomIndex, 1)[0];
-        if (newLetters[letterIndexToChange]) { 
-          newLetters[letterIndexToChange] = { 
-            ...newLetters[letterIndexToChange], 
-            status: 'good' as GameLetterStatus 
-          }; 
+        if (newLetters[letterIndexToChange]) {
+          newLetters[letterIndexToChange] = {
+            ...newLetters[letterIndexToChange],
+            status: 'good' as GameLetterStatus
+          };
         }
       }
       return newLetters;
     });
     
-    // Schedule next round with a variable delay
-    gameRoundTimerRef.current = setTimeout(() => { 
-      startGameDesignerRound(); 
+    // Schedule next round with a variable delay - this will only be used if no letters are clicked
+    gameRoundTimerRef.current = setTimeout(() => {
+      startGameDesignerRound();
     }, 1500 + Math.random() * 500);
   };
 
@@ -239,7 +241,7 @@ export default function Home() {
     };
   }, [displayedTitle, gameDesignerPaused]);
 
-  // Update the handleLetterClick function to only start the game when clicking a lit letter
+  // Update the handleLetterClick function
   const handleLetterClick = (letterId: string) => {
     // Get the letter being clicked
     const clickedLetter = gameDesignerLetters.find(l => l.id === letterId);
@@ -277,24 +279,44 @@ export default function Home() {
       
       // Pop the clicked letter
       setGameDesignerLetters(prevLetters => {
-        return prevLetters.map(l => {
+        const newLetters = prevLetters.map(l => {
           if (l.id === letterId && l.status === 'good') {
             return { ...l, status: 'popped' as GameLetterStatus };
           }
           return l;
         });
+        
+        // Check if all non-space letters are popped
+        const nonSpaceLetters = newLetters.filter(l => l.char !== ' ');
+        const poppedNonSpaceLetters = nonSpaceLetters.filter(l => l.status === 'popped');
+        
+        if (poppedNonSpaceLetters.length === nonSpaceLetters.length) {
+          if (!gameEndTime) {
+            setGameEndTime(Date.now());
+            gameWonRef.current = true;
+          }
+        } else {
+          // If there are still letters to pop and all lit ones were popped,
+          // immediately start next round
+          const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
+          if (remainingLitLetters.length === 0) {
+            // Clear the scheduled next round
+            if (gameRoundTimerRef.current) {
+              clearTimeout(gameRoundTimerRef.current);
+              gameRoundTimerRef.current = null;
+            }
+            // Immediately start next round
+            setTimeout(() => startGameDesignerRound(), 0);
+          }
+        }
+        
+        return newLetters;
       });
-      
-      // Schedule rounds to start after a short delay
-      setTimeout(() => {
-        startGameDesignerRound();
-      }, 800);
       
       return;
     }
     
     // For ongoing gameplay (not the first click)
-    // Only process clicks during active gameplay
     if (!gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE) {
       const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
       
@@ -314,19 +336,27 @@ export default function Home() {
             return l;
           });
           
-          const totalGameLetters = newLetters.filter(l => l.char !== ' ').length;
-          const poppedGameLetters = newLetters.filter(l => l.status === 'popped' && l.char !== ' ').length;
+          // Check if all non-space letters are popped
+          const nonSpaceLetters = newLetters.filter(l => l.char !== ' ');
+          const poppedNonSpaceLetters = nonSpaceLetters.filter(l => l.status === 'popped');
           
-          if (poppedGameLetters === totalGameLetters && totalGameLetters > 0) {
+          if (poppedNonSpaceLetters.length === nonSpaceLetters.length) {
             if (!gameEndTime) {
               setGameEndTime(Date.now());
               gameWonRef.current = true;
-              
-              // Clear any auto-advance timer when the game is won
-              if (gameDesignerAutoAdvanceRef.current) {
-                clearTimeout(gameDesignerAutoAdvanceRef.current);
-                gameDesignerAutoAdvanceRef.current = null;
+            }
+          } else {
+            // If there are still letters to pop and all lit ones were popped,
+            // immediately start next round
+            const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
+            if (remainingLitLetters.length === 0) {
+              // Clear the scheduled next round
+              if (gameRoundTimerRef.current) {
+                clearTimeout(gameRoundTimerRef.current);
+                gameRoundTimerRef.current = null;
               }
+              // Immediately start next round
+              setTimeout(() => startGameDesignerRound(), 0);
             }
           }
           
@@ -699,15 +729,15 @@ export default function Home() {
     }
   };
 
-  // Add the letter highlighting effect back
+  // Update the initial letter highlighting effect
   useEffect(() => {
     // Highlight a random letter when Game Designer title first appears
     if (displayedTitle === GAME_DESIGNER_TITLE && gameDesignerPaused) {
       setGameDesignerLetters(prevLetters => {
         // Only modify if no letter is already highlighted (prevent re-runs)
         if (!prevLetters.some(l => l.status === 'good')) {
-          // Choose a random letter to highlight first
-          const nonSpaceLetters = prevLetters.filter(l => l.char !== ' ');
+          // Choose a random letter to highlight first, excluding spaces
+          const nonSpaceLetters = prevLetters.filter(l => l.char !== ' ' && l.status !== 'popped');
           if (nonSpaceLetters.length === 0) return prevLetters; // Safety check
           
           const randomLetter = nonSpaceLetters[Math.floor(Math.random() * nonSpaceLetters.length)];
@@ -716,7 +746,7 @@ export default function Home() {
             if (l.id === randomLetter.id) {
               return { ...l, status: 'good' as GameLetterStatus };
             }
-            return { ...l, status: 'neutral' as GameLetterStatus };
+            return l;
           });
         }
         return prevLetters;
@@ -817,7 +847,6 @@ export default function Home() {
 
           <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
             Blending technical expertise with creative vision
-{/* <<<<<<< HEAD */}
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mt-8">
@@ -847,8 +876,13 @@ export default function Home() {
       </section>
 
       {/* Navigation Tabs */}
-      <div ref={tabsRef}>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-6xl mx-auto mt-8 px-4">
+      <div ref={tabsRef} className="w-full max-w-6xl mx-auto px-4 mt-8">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full"
+          style={{ minWidth: '100%' }}
+        >
           <TabsList className="w-full grid grid-cols-5 mb-8">
             <TabsTrigger value="games" className="flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
@@ -872,25 +906,27 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="games" className="space-y-8 pb-16">
-            <PasswordProtectedGameShowcase />
-          </TabsContent>
+          <div className="TabsContent-wrapper">
+            <TabsContent value="games" className="space-y-8 pb-16">
+              <PasswordProtectedGameShowcase />
+            </TabsContent>
 
-          <TabsContent value="skills" className="space-y-8 pb-16">
-            <SkillsDisplay />
-          </TabsContent>
+            <TabsContent value="skills" className="space-y-8 pb-16">
+              <SkillsDisplay />
+            </TabsContent>
 
-          <TabsContent value="stagedive" className="space-y-8 pb-16">
-            <StageDiveShowcase />
-          </TabsContent>
+            <TabsContent value="stagedive" className="space-y-8 pb-16">
+              <StageDiveShowcase />
+            </TabsContent>
 
-          <TabsContent value="music" className="space-y-8 pb-16">
-            <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
-          </TabsContent>
+            <TabsContent value="music" className="space-y-8 pb-16">
+              <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
+            </TabsContent>
 
-          <TabsContent value="contact" className="space-y-8 pb-16">
-            <ContactSection />
-          </TabsContent>
+            <TabsContent value="contact" className="space-y-8 pb-16">
+              <ContactSection />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
 
