@@ -899,11 +899,10 @@ export default function Home() {
           <div>
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Globe className="h-5 w-5 text-pink-500" />
-              Game Designer Portfolio
+              Michael Straus
             </h3>
             <p className="text-gray-400">
-              Creating memorable gaming experiences through innovative design
-              and storytelling.
+              Blending technical expertise with creative vision
             </p>
           </div>
 
@@ -1030,7 +1029,7 @@ export default function Home() {
 
         <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-gray-800 text-center text-gray-500">
           <p>
-            © {new Date().getFullYear()} Game Designer Portfolio. All rights
+            © {new Date().getFullYear()} Michael Straus. All rights
             reserved.
           </p>
         </div>
