@@ -68,7 +68,7 @@ export default function GameShowcase({
       gameUrl: "https://rmg.boomfantasy.com/moneytree/1/dist/index.html",
       controls: "Choose your bet amount, Spam the Spin button to win big!",
       tags: ["Casino", "Roulette","3D"],
-      role: "I championed the introduction of instant-win mechanics into Boom’s game library, identifying the trend early and pushing Lucky Money Tree as a vehicle for innovation. I led the R&D phase to implement dynamic, layered Spine animations—engineering a blend system that made the tree react fluidly and convincingly to player interactions. In addition to daily production oversight, I served as Sound Director, shaping the game’s audio and coordinating external sound resources to match the game’s whimsical, high-energy feel."
+      role: "I championed the introduction of instant-win mechanics into Boom's game library, identifying the trend early and pushing Lucky Money Tree as a vehicle for innovation. I led the R&D phase to implement dynamic, layered Spine animations—engineering a blend system that made the tree react fluidly and convincingly to player interactions. In addition to daily production oversight, I served as Sound Director, shaping the game's audio and coordinating external sound resources to match the game's whimsical, high-energy feel."
     },
     { id: "game3",
       title: "Fanatics Fire Roulette",
@@ -79,7 +79,7 @@ export default function GameShowcase({
       gameUrl: "https://rmg.boomfantasy.com/hotspotroulette/1/dist/index.html?landscape=true",
       controls: "Place your bets on the table, Press the Spin button to start the game",
       tags: ["Casino", "Roulette","3D"],
-      role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game’s complete sound design."
+      role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game's complete sound design."
     },
     { id: "game9",
       title: "Fanatics Multihand Blackjack with Sidebets",
@@ -90,7 +90,7 @@ export default function GameShowcase({
       gameUrl: "https://rmg.boomfantasy.com/blackjackmultihand2/dist/index.html?landscape=true",
       controls: "Place your bets on the table, Press the deal button to start the game",
       tags: ["Casino", "Blackjack","3D"],
-      role: "As Producer and UX Designer, I led end-to-end development on The Fanatics Blackjack Games and their Alternate Skins, including wireframes, player flow, and client communication with Fanatics.  Rounding out my role, I served as Music Director, created the game’s complete sound design, and composed the Piano Trio Background music"
+      role: "As Producer and UX Designer, I led end-to-end development on The Fanatics Blackjack Games and their Alternate Skins, including wireframes, player flow, and client communication with Fanatics.  Rounding out my role, I served as Music Director, created the game's complete sound design, and composed the Piano Trio Background music"
     },
     {
       id: "game4",
@@ -102,7 +102,7 @@ export default function GameShowcase({
       gameUrl: "https://rmg.boomfantasy.com/blastradius/1/dist/index.html",
       controls: "Find a Prize or Prizes you want and click on it until you win. I Recommend setting the bet to at least $.10",
       tags: ["Inovation", "Instant Win", "WYSIWYG"],
-      role: "I led the early concept development and prototyping of Blast Radius, building a Unity prototype to test gameplay mechanics before full production. My responsibilities included UX design, wireframing, and daily production oversight. I authored the game rules, wrote marketing copy, and managed external art and sound vendors. As Sound Director, I shaped the game’s audio identity—including recording custom alien vocals featuring myself and my daughter for the game's signature “oop-eeep” backing music."
+      role: "I led the early concept development and prototyping of Blast Radius, building a Unity prototype to test gameplay mechanics before full production. My responsibilities included UX design, wireframing, and daily production oversight. I authored the game rules, wrote marketing copy, and managed external art and sound vendors. As Sound Director, I shaped the game's audio identity—including recording custom alien vocals featuring myself and my daughter for the game's signature 'oop-eeep' backing music."
     },
     {
       id: "game5",
@@ -114,7 +114,7 @@ export default function GameShowcase({
       gameUrl: "https://slotcatalog.com/en/slots/Retro-Riches?ajax=1&blck=demo-widget",
       controls: "Select your bet, Press the spin button to spin the reels.",
       tags: ["Innovation", "Retro", "Dots and Shapes"],
-      role: "Born from a vague “dots and shapes” prompt from our CEO, I led the innovation and feature design of Retro Riches, translating that spark into a fully playable Unity prototype in just two weeks. The prototype revealed surprisingly engaging gameplay, prompting full development. I designed and implemented a long-term progression system that tracks player collections across sessions—expanding their symbol bank over time and increasing prize potential. The result was a fresh take on slots with a persistent, player-driven meta layer."
+      role: "Born from a vague 'dots and shapes' prompt from our CEO, I led the innovation and feature design of Retro Riches, translating that spark into a fully playable Unity prototype in just two weeks. The prototype revealed surprisingly engaging gameplay, prompting full development. I designed and implemented a long-term progression system that tracks player collections across sessions—expanding their symbol bank over time and increasing prize potential. The result was a fresh take on slots with a persistent, player-driven meta layer."
     },
     {
       id: "game6",
@@ -170,8 +170,8 @@ export default function GameShowcase({
   };
 
   return (
-    <div className="w-full bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="w-full">
+      <div className="mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-primary mb-4">{title}</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">

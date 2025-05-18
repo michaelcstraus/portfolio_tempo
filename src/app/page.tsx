@@ -876,8 +876,13 @@ export default function Home() {
       </section>
 
       {/* Navigation Tabs */}
-      <div ref={tabsRef}>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-6xl mx-auto mt-8 px-4">
+      <div ref={tabsRef} className="w-full max-w-6xl mx-auto px-4 mt-8">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full"
+          style={{ minWidth: '100%' }}
+        >
           <TabsList className="w-full grid grid-cols-5 mb-8">
             <TabsTrigger value="games" className="flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
@@ -901,25 +906,27 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="games" className="space-y-8 pb-16">
-            <PasswordProtectedGameShowcase />
-          </TabsContent>
+          <div className="TabsContent-wrapper">
+            <TabsContent value="games" className="space-y-8 pb-16">
+              <PasswordProtectedGameShowcase />
+            </TabsContent>
 
-          <TabsContent value="skills" className="space-y-8 pb-16">
-            <SkillsDisplay />
-          </TabsContent>
+            <TabsContent value="skills" className="space-y-8 pb-16">
+              <SkillsDisplay />
+            </TabsContent>
 
-          <TabsContent value="stagedive" className="space-y-8 pb-16">
-            <StageDiveShowcase />
-          </TabsContent>
+            <TabsContent value="stagedive" className="space-y-8 pb-16">
+              <StageDiveShowcase />
+            </TabsContent>
 
-          <TabsContent value="music" className="space-y-8 pb-16">
-            <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
-          </TabsContent>
+            <TabsContent value="music" className="space-y-8 pb-16">
+              <MusicSection spotifyPlaylistUrl="https://open.spotify.com/embed/playlist/2pJtpscottccINgiUvWwlY?utm_source=generator" />
+            </TabsContent>
 
-          <TabsContent value="contact" className="space-y-8 pb-16">
-            <ContactSection />
-          </TabsContent>
+            <TabsContent value="contact" className="space-y-8 pb-16">
+              <ContactSection />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
 
