@@ -78,6 +78,7 @@ export default function Home() {
   const settleSoundRef = useRef<HTMLAudioElement | null>(null);
   const isGlitchSoundPlayingRef = useRef(false);
   const gameBackgroundMusicRef = useRef<HTMLAudioElement | null>(null); // Background music for game
+  const gameWinSoundRef = useRef<HTMLAudioElement | null>(null); // <-- ADDED for win sound
   
   // Add new audio refs for title landing sounds
   const productDirectorLandSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -163,6 +164,11 @@ export default function Home() {
     // setCurrentGameTime(0); // Reset live display, or let winner message show final from gameEndTime
 
     if (gameWon) {
+      // Play the win sound
+      if (gameWinSoundRef.current) {
+        gameWinSoundRef.current.currentTime = 0;
+        gameWinSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
+      }
       setShowWinnerMessage(true);
       nextTitleTimeoutRef.current = setTimeout(() => {
         setShowWinnerMessage(false); 
@@ -626,6 +632,12 @@ export default function Home() {
   }, [displayedTitle, gameDesignerPaused]); // startGlitchSequence is omitted as it's not memoized; logic relies on other deps.
 
   const handleMouseEnter = () => {
+    // If a winner message is currently being displayed for the Game Designer title,
+    // don't interrupt it by starting a new glitch sequence.
+    // The winner message has its own timeout to transition.
+    if (showWinnerMessage && PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE) {
+      return;
+    }
     startGlitchSequence();
   };
 
@@ -731,6 +743,10 @@ export default function Home() {
     if (gameBackgroundMusicRef.current) {
       gameBackgroundMusicRef.current.loop = true;
     }
+    gameWinSoundRef.current = new Audio('/sounds/8bitterm.ogg'); // <-- INITIALIZE win sound
+    if (gameWinSoundRef.current) {
+      gameWinSoundRef.current.loop = false; // Ensure it does not loop
+    }
 
     // Initialize title landing sounds
     productDirectorLandSoundRef.current = new Audio('/sounds/product_director_land.ogg');
@@ -767,6 +783,13 @@ export default function Home() {
         if (gameBackgroundMusicRef.current) {
           gameBackgroundMusicRef.current.srcObject = null;
           gameBackgroundMusicRef.current.src = '';
+        }
+      }
+      if (gameWinSoundRef.current) { // <-- CLEANUP for win sound
+        gameWinSoundRef.current.pause();
+        if (gameWinSoundRef.current) {
+            gameWinSoundRef.current.srcObject = null;
+            gameWinSoundRef.current.src = '';
         }
       }
       // Clean up title landing sounds
