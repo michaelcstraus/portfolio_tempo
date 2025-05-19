@@ -58,7 +58,7 @@ const SkillsDisplay = ({
       company: "Boom Entertainment",
       period: "2022-2025",
       description:
-        "Led a team of 5 designers to create award-winning mobile games with over 1M downloads. Responsible for game mechanics, level design, and player experience optimization.",
+        "Led end-to-end development on multiple high-impact casino games from concept to launch. Oversaw cross-functional teams including game design, math, art, engineering, and audio. Spearheaded innovation pipelines, rapid prototyping, and market-driven feature development. Collaborated with partners and internal stakeholders to ensure timely delivery, regulatory compliance, and performance optimization. Known for turning creative concepts into successful, data-informed products that drive revenue and engagement.",
       skills: ["Game Design", "Team Leadership", "Product Strategy", "Vendor Management"],
     },
     {
@@ -66,7 +66,7 @@ const SkillsDisplay = ({
       company: "Boom Entertainment",
       period: "2021 - 2022",
       description:
-        "Designed game mechanics and levels for 3 AAA console titles. Collaborated with artists and developers to implement engaging player experiences.",
+        "Drove the creative vision and early development of new game concepts within Boom’s in-house studio. Led a small, agile innovation team focused on rapid prototyping, feature experimentation, and long-term engagement mechanics. Collaborated closely with math, engineering, and product teams to test ideas, build playable demos, and validate concepts with data. Helped define the future roadmap by translating vague ideas into scalable, player-centric experiences.",
       skills: [
         "Game Design",
         "UI/UX",
@@ -79,7 +79,7 @@ const SkillsDisplay = ({
       company: "Johns Hopkins University (Peabody Institute)",
       period: "2021 - 2022",
       description:
-        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+        "Developed curriculum and taught a Sound Design for Game Audio covering creative and technical aspects of game production.",
       skills: ["FMOD", "Unity", "Syllabus Development", "Teaching"],
     },
     {
@@ -87,7 +87,7 @@ const SkillsDisplay = ({
       company: "High 5 Games",
       period: "2018 - 2021",
       description:
-        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+        "Founding Member of the Game Innovation Team, leading rapid prototyping in Unity to develop and iterate on product concepts. Designed and developed 25+ unique state-of-the-art games.",
       skills: ["Unity", "C#", "Bug Fixing", "Audio Programming", "Design", "Team Leadership"],
     },
     {
@@ -95,7 +95,7 @@ const SkillsDisplay = ({
       company: "High 5 Games",
       period: "2013 - 2018",
       description:
-        "Developed gameplay features and fixed bugs for mobile and web-based games using Unity and JavaScript.",
+        "Oversaw the sound team and audio delivery across over 100 slot game titles. Designed, built, and maintained sound facilities at three locations, including 1 World Trade Center.",
       skills: ["Unity", "C#", "Recording" , "Studio Design", "Audio Programming"],
     },
   ],
