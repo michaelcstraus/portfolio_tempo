@@ -80,6 +80,15 @@ export default function Home() {
   const gameBackgroundMusicRef = useRef<HTMLAudioElement | null>(null); // Background music for game
   const gameWinSoundRef = useRef<HTMLAudioElement | null>(null); // <-- ADDED for win sound
   
+  // Ref to track if game music was playing before tab was hidden
+  const wasGameMusicPlayingBeforeHiddenRef = useRef(false);
+
+  // Refs to mirror state for access in visibility handler
+  const isGameDesignerAnimatingRef = useRef(isGameDesignerAnimating);
+  const displayedTitleRef = useRef(displayedTitle);
+  const gameDesignerPausedRef = useRef(gameDesignerPaused);
+  const showWinnerMessageRef = useRef(showWinnerMessage);
+
   // Add new audio refs for title landing sounds
   const productDirectorLandSoundRef = useRef<HTMLAudioElement | null>(null);
   const gameDesignerLandSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -167,7 +176,7 @@ export default function Home() {
       // Play the win sound
       if (gameWinSoundRef.current) {
         gameWinSoundRef.current.currentTime = 0;
-        gameWinSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
+        !document.hidden && gameWinSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
       }
       setShowWinnerMessage(true);
       nextTitleTimeoutRef.current = setTimeout(() => {
@@ -290,7 +299,7 @@ export default function Home() {
       
       if (gameBackgroundMusicRef.current) {
         gameBackgroundMusicRef.current.currentTime = 0;
-        gameBackgroundMusicRef.current.play().catch(e => console.error("Game music error", e));
+        !document.hidden && gameBackgroundMusicRef.current.play().catch(e => console.error("Game music error", e));
       }
       
       if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current);
@@ -305,7 +314,7 @@ export default function Home() {
       
       if (popSoundRef.current) {
         popSoundRef.current.currentTime = 0;
-        popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
+        !document.hidden && popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
       }
       
       setGameDesignerLetters(prevLetters => {
@@ -351,7 +360,7 @@ export default function Home() {
       if (letterBeforeClick && letterBeforeClick.status === 'good') {
         if (popSoundRef.current) {
           popSoundRef.current.currentTime = 0;
-          popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
+          !document.hidden && popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
         }
         
         setGameDesignerLetters(prevLetters => {
@@ -482,7 +491,7 @@ export default function Home() {
           if (glitchSoundRef.current.duration && Number.isFinite(glitchSoundRef.current.duration)) {
             try { const randomStartTime = Math.random() * glitchSoundRef.current.duration; glitchSoundRef.current.currentTime = randomStartTime; } catch (error) { console.error("Error setting random currentTime for glitch sound:", error); if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
           } else { if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
-          glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
+          !document.hidden && glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
           isGlitchSoundPlayingRef.current = true;
         }
         setDisplayedTitle(generateGlitchedText(targetTitle));
@@ -500,19 +509,19 @@ export default function Home() {
         // Play the appropriate landing sound based on the target title
         if (targetTitle === GAME_DESIGNER_TITLE && gameDesignerLandSoundRef.current) {
           gameDesignerLandSoundRef.current.currentTime = 0;
-          gameDesignerLandSoundRef.current.play().catch(error => console.error("Error playing game designer land sound:", error));
+          !document.hidden && gameDesignerLandSoundRef.current.play().catch(error => console.error("Error playing game designer land sound:", error));
         } else if (targetTitle === AUDIO_PROGRAMMER_TITLE && audioProgrammerLandSoundRef.current) {
           audioProgrammerLandSoundRef.current.currentTime = 0;
-          audioProgrammerLandSoundRef.current.play().catch(error => console.error("Error playing audio programmer land sound:", error));
+          !document.hidden && audioProgrammerLandSoundRef.current.play().catch(error => console.error("Error playing audio programmer land sound:", error));
         } else if (targetTitle === CREATIVE_LEAD_TITLE && creativeLeadLandSoundRef.current) {
           creativeLeadLandSoundRef.current.currentTime = 0;
-          creativeLeadLandSoundRef.current.play().catch(error => console.error("Error playing creative lead land sound:", error));
+          !document.hidden && creativeLeadLandSoundRef.current.play().catch(error => console.error("Error playing creative lead land sound:", error));
         } else if (targetTitle === "Product Director" && productDirectorLandSoundRef.current) {
           productDirectorLandSoundRef.current.currentTime = 0;
-          productDirectorLandSoundRef.current.play().catch(error => console.error("Error playing product director land sound:", error));
+          !document.hidden && productDirectorLandSoundRef.current.play().catch(error => console.error("Error playing product director land sound:", error));
         } else if (targetTitle === "Sound Director" && soundDirectorLandSoundRef.current) {
           soundDirectorLandSoundRef.current.currentTime = 0;
-          soundDirectorLandSoundRef.current.play().catch(error => console.error("Error playing sound director land sound:", error));
+          !document.hidden && soundDirectorLandSoundRef.current.play().catch(error => console.error("Error playing sound director land sound:", error));
         }
         
         activeTitleIndexRef.current = nextIndex;
@@ -755,6 +764,52 @@ export default function Home() {
     creativeLeadLandSoundRef.current = new Audio('/sounds/creative_lead_land.ogg');
     soundDirectorLandSoundRef.current = new Audio('/sounds/sound_director_land.ogg');
 
+    const handleVisibilityChange = () => {
+      const allOneShotSoundRefs = [
+        settleSoundRef, popSoundRef, gameWinSoundRef,
+        productDirectorLandSoundRef, gameDesignerLandSoundRef, audioProgrammerLandSoundRef,
+        creativeLeadLandSoundRef, soundDirectorLandSoundRef
+      ];
+
+      if (document.hidden) {
+        console.log("Tab hidden, pausing audio");
+        // Glitch Sound
+        if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
+          glitchSoundRef.current.pause();
+          isGlitchSoundPlayingRef.current = false; // Allow main loop to restart if active on focus
+        }
+        // Game Background Music
+        if (gameBackgroundMusicRef.current && !gameBackgroundMusicRef.current.paused) {
+          gameBackgroundMusicRef.current.pause();
+          wasGameMusicPlayingBeforeHiddenRef.current = true;
+        }
+        // One-shot sounds
+        allOneShotSoundRefs.forEach(audioRef => {
+          if (audioRef.current && !audioRef.current.paused) {
+            audioRef.current.pause();
+          }
+        });
+      } else {
+        console.log("Tab visible, resuming audio if needed");
+        // Game Background Music (resume if it was playing and game is still active according to refs)
+        if (wasGameMusicPlayingBeforeHiddenRef.current) {
+          if (gameBackgroundMusicRef.current &&
+              isGameDesignerAnimatingRef.current &&
+              displayedTitleRef.current === GAME_DESIGNER_TITLE &&
+              !gameDesignerPausedRef.current &&
+              !showWinnerMessageRef.current
+             ) {
+            gameBackgroundMusicRef.current.play().catch(e => console.error("Error resuming game music:", e));
+          }
+          wasGameMusicPlayingBeforeHiddenRef.current = false;
+        }
+        // Glitch sound is handled by its own loop reacting to isGlitchSoundPlayingRef.current being false.
+        // One-shot sounds are not automatically resumed.
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       cleanUpTimers();
       if (glitchSoundRef.current) {
@@ -818,8 +873,27 @@ export default function Home() {
         soundDirectorLandSoundRef.current.srcObject = null;
         soundDirectorLandSoundRef.current.src = '';
       }
+
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // Explicitly pause all sounds again on unmount
+      const allAudioRefsForUnmount = [
+          glitchSoundRef, settleSoundRef, popSoundRef, gameBackgroundMusicRef, gameWinSoundRef,
+          productDirectorLandSoundRef, gameDesignerLandSoundRef, audioProgrammerLandSoundRef,
+          creativeLeadLandSoundRef, soundDirectorLandSoundRef
+      ];
+      allAudioRefsForUnmount.forEach(audioRef => {
+          if (audioRef.current && !audioRef.current.paused) {
+              audioRef.current.pause();
+          }
+      });
     };
   }, []);
+
+  // Effects to keep refs in sync with state for visibility handler
+  useEffect(() => { isGameDesignerAnimatingRef.current = isGameDesignerAnimating; }, [isGameDesignerAnimating]);
+  useEffect(() => { displayedTitleRef.current = displayedTitle; }, [displayedTitle]);
+  useEffect(() => { gameDesignerPausedRef.current = gameDesignerPaused; }, [gameDesignerPaused]);
+  useEffect(() => { showWinnerMessageRef.current = showWinnerMessage; }, [showWinnerMessage]);
 
   const scrollToTabs = (tabValue: string) => {
     setActiveTab(tabValue);
