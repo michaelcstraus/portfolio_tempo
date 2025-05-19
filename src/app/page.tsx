@@ -182,18 +182,12 @@ export default function Home() {
       const activeLetters = prevLetters.filter(l => l.status !== 'popped' && l.char !== ' ');
       if (activeLetters.length === 0) {
         if (gameStartTime && !gameEndTime) {
-          console.log("All letters popped in startGameDesignerRound - Setting game end time");
+          console.log("All letters popped in startGameDesignerRound - Setting game end state for useEffect to handle.");
           setGameEndTime(Date.now());
           gameWonRef.current = true;
-          // Directly call endGameDesignerGame after a short delay to ensure state updates have processed
-          setTimeout(() => {
-            if (gameWonRef.current) {
-              endGameDesignerGame(true);
-              gameWonRef.current = false;
-            }
-          }, 100);
+          // REMOVED: setTimeout for endGameDesignerGame(true)
         }
-        return prevLetters;
+        return prevLetters; // Important: if game is over, don't light up new letters
       }
       
       // Reset all non-space letters to neutral first
@@ -221,6 +215,7 @@ export default function Home() {
     });
     
     // Schedule next round with a variable delay - this will only be used if no letters are clicked
+    // The win condition check within setGameDesignerLetters should prevent new rounds if game is won.
     gameRoundTimerRef.current = setTimeout(() => {
       startGameDesignerRound();
     }, 1500 + Math.random() * 500);
@@ -276,24 +271,17 @@ export default function Home() {
     
     // If we're in paused state and the clicked letter is 'good' (lit), start the game
     if (gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE && clickedLetter?.status === 'good') {
-      // Clear any auto-advance timer
       if (gameDesignerAutoAdvanceRef.current) {
         clearTimeout(gameDesignerAutoAdvanceRef.current);
         gameDesignerAutoAdvanceRef.current = null;
       }
       
-      // Reset win state flags for new game
       gameWonRef.current = false;
       setGameEndTime(null);
-      
-      // Start the game
       setGameDesignerPaused(false);
-      
-      // Start the timer
       setGameStartTime(Date.now());
       setCurrentGameTime(0);
       
-      // Start the background music
       if (gameBackgroundMusicRef.current) {
         gameBackgroundMusicRef.current.currentTime = 0;
         gameBackgroundMusicRef.current.play().catch(e => console.error("Game music error", e));
@@ -309,13 +297,11 @@ export default function Home() {
         });
       }, 100);
       
-      // Play pop sound and mark the clicked letter as popped
       if (popSoundRef.current) {
         popSoundRef.current.currentTime = 0;
         popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
       }
       
-      // Pop the clicked letter
       setGameDesignerLetters(prevLetters => {
         const newLetters = prevLetters.map(l => {
           if (l.id === letterId && l.status === 'good') {
@@ -324,46 +310,39 @@ export default function Home() {
           return l;
         });
         
-        // Check if all non-space letters are popped
         const nonSpaceLetters = newLetters.filter(l => l.char !== ' ');
-        const poppedNonSpaceLetters = nonSpaceLetters.filter(l => l.status === 'popped');
+        // CORRECTED calculation for poppedNonSpaceLetters
+        const poppedNonSpaceLetters = newLetters.filter(l => l.status === 'popped' && l.char !== ' ');
         
         console.log(`Popped: ${poppedNonSpaceLetters.length}/${nonSpaceLetters.length} letters`);
         
         if (poppedNonSpaceLetters.length === nonSpaceLetters.length) {
-          console.log("All letters popped in first click - Setting game end time");
-          if (!gameEndTime) {
+          console.log("All letters popped on first interactive click - Setting game end state for useEffect.");
+          if (!gameEndTime) { // Ensure gameEndTime is set only once
             setGameEndTime(Date.now());
             gameWonRef.current = true;
+            // REMOVED: setTimeout for endGameDesignerGame(true)
           }
         } else {
-          // If there are still letters to pop and all lit ones were popped,
-          // immediately start next round
           const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
           if (remainingLitLetters.length === 0) {
-            // Clear the scheduled next round
             if (gameRoundTimerRef.current) {
               clearTimeout(gameRoundTimerRef.current);
               gameRoundTimerRef.current = null;
             }
-            // Immediately start next round
             setTimeout(() => startGameDesignerRound(), 0);
           }
         }
-        
         return newLetters;
       });
-      
       return;
     }
     
-    // For ongoing gameplay (not the first click)
+    // For ongoing gameplay (not the first click that starts the game)
     if (!gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE) {
       const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
       
-      // Check if the letter is a valid target
       if (letterBeforeClick && letterBeforeClick.status === 'good') {
-        // Play pop sound and mark letter as popped
         if (popSoundRef.current) {
           popSoundRef.current.currentTime = 0;
           popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
@@ -372,38 +351,34 @@ export default function Home() {
         setGameDesignerLetters(prevLetters => {
           const newLetters = prevLetters.map(l => {
             if (l.id === letterId && l.status === 'good') {
-              return { ...l, status: 'popped' as GameLetterStatus };
+              return { ...l, status: 'popped'as GameLetterStatus };
             }
             return l;
           });
           
-          // Check if all non-space letters are popped
           const nonSpaceLetters = newLetters.filter(l => l.char !== ' ');
-          const poppedNonSpaceLetters = nonSpaceLetters.filter(l => l.status === 'popped');
+          // CORRECTED calculation for poppedNonSpaceLetters
+          const poppedNonSpaceLetters = newLetters.filter(l => l.status === 'popped' && l.char !== ' ');
           
           console.log(`Popped: ${poppedNonSpaceLetters.length}/${nonSpaceLetters.length} letters`);
           
           if (poppedNonSpaceLetters.length === nonSpaceLetters.length) {
-            console.log("All letters popped in click - Setting game end time");
-            if (!gameEndTime) {
+            console.log("All letters popped in ongoing play - Setting game end state for useEffect.");
+            if (!gameEndTime) { // Ensure gameEndTime is set only once
               setGameEndTime(Date.now());
               gameWonRef.current = true;
+              // REMOVED: setTimeout for endGameDesignerGame(true)
             }
           } else {
-            // If there are still letters to pop and all lit ones were popped,
-            // immediately start next round
             const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
             if (remainingLitLetters.length === 0) {
-              // Clear the scheduled next round
               if (gameRoundTimerRef.current) {
                 clearTimeout(gameRoundTimerRef.current);
                 gameRoundTimerRef.current = null;
               }
-              // Immediately start next round
               setTimeout(() => startGameDesignerRound(), 0);
             }
           }
-          
           return newLetters;
         });
       }
