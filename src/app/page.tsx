@@ -739,7 +739,7 @@ export default function Home() {
     }
     settleSoundRef.current = new Audio('/sounds/land.wav');
     popSoundRef.current = new Audio('/sounds/pop.wav');
-    gameBackgroundMusicRef.current = new Audio('/sounds/8bitloop.ogg');
+    gameBackgroundMusicRef.current = new Audio('/sounds/8bitloop.mp3');
     if (gameBackgroundMusicRef.current) {
       gameBackgroundMusicRef.current.loop = true;
     }
