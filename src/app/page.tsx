@@ -34,11 +34,11 @@ const SOUND_GLITCH = 'glitch';
 const SOUND_POP = 'pop';
 const SOUND_GAME_MUSIC = 'gameMusic';
 const SOUND_GAME_WIN = 'gameWin';
-const SOUND_PRODUCT_DIRECTOR_LAND = 'productDirectorLand';
-const SOUND_GAME_DESIGNER_LAND = 'gameDesignerLand';
+// const SOUND_PRODUCT_DIRECTOR_LAND = 'productDirectorLand';
+// const SOUND_GAME_DESIGNER_LAND = 'gameDesignerLand';
 const SOUND_AUDIO_PROGRAMMER_LAND = 'audioProgrammerLand';
-const SOUND_CREATIVE_LEAD_LAND = 'creativeLeadLand';
-const SOUND_SOUND_DIRECTOR_LAND = 'soundDirectorLand';
+// const SOUND_CREATIVE_LEAD_LAND = 'creativeLeadLand';
+// const SOUND_SOUND_DIRECTOR_LAND = 'soundDirectorLand';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
@@ -471,11 +471,11 @@ export default function Home() {
 
         // Play the appropriate landing sound based on the target title
         if (!document.hidden) {
-            if (targetTitle === GAME_DESIGNER_TITLE) audioManager.playSound(SOUND_GAME_DESIGNER_LAND);
-            else if (targetTitle === AUDIO_PROGRAMMER_TITLE) audioManager.playSound(SOUND_AUDIO_PROGRAMMER_LAND);
-            else if (targetTitle === CREATIVE_LEAD_TITLE) audioManager.playSound(SOUND_CREATIVE_LEAD_LAND);
-            else if (targetTitle === "Product Director") audioManager.playSound(SOUND_PRODUCT_DIRECTOR_LAND);
-            else if (targetTitle === "Sound Director") audioManager.playSound(SOUND_SOUND_DIRECTOR_LAND);
+            // if (targetTitle === GAME_DESIGNER_TITLE) audioManager.playSound(SOUND_GAME_DESIGNER_LAND);
+            if (targetTitle === AUDIO_PROGRAMMER_TITLE) audioManager.playSound(SOUND_AUDIO_PROGRAMMER_LAND);
+            // else if (targetTitle === CREATIVE_LEAD_TITLE) audioManager.playSound(SOUND_CREATIVE_LEAD_LAND);
+            // else if (targetTitle === "Product Director") audioManager.playSound(SOUND_PRODUCT_DIRECTOR_LAND);
+            // else if (targetTitle === "Sound Director") audioManager.playSound(SOUND_SOUND_DIRECTOR_LAND);
         }
         
         activeTitleIndexRef.current = nextIndex;
@@ -749,19 +749,19 @@ export default function Home() {
   useEffect(() => {
     const soundsToLoad = [
       { name: SOUND_GLITCH, path: '/sounds/glitch_loop.wav', loop: true, volume: 0.7 },
-      { name: SOUND_POP, path: '/sounds/pop.wav', volume: 0.8 },
+      { name: SOUND_POP, path: '/sounds/pop.wav', volume: 0.7 },
       { name: SOUND_GAME_MUSIC, path: '/sounds/8bitloop.mp3', loop: true, volume: 0.5 },
-      { name: SOUND_GAME_WIN, path: '/sounds/8bitterm.ogg', volume: 0.9 },
-      { name: SOUND_PRODUCT_DIRECTOR_LAND, path: '/sounds/product_director_land.ogg', volume: 0.9 },
-      { name: SOUND_GAME_DESIGNER_LAND, path: '/sounds/game_designer_land.ogg', volume: 0.9 },
-      { name: SOUND_AUDIO_PROGRAMMER_LAND, path: '/sounds/audio_programmer_land.ogg', volume: 0.9 },
-      { name: SOUND_CREATIVE_LEAD_LAND, path: '/sounds/creative_lead_land.ogg', volume: 0.9 },
-      { name: SOUND_SOUND_DIRECTOR_LAND, path: '/sounds/sound_director_land.ogg', volume: 0.9 },
+      { name: SOUND_GAME_WIN, path: '/sounds/8bitterm.ogg', volume: 0.5 },
+      // { name: SOUND_PRODUCT_DIRECTOR_LAND, path: '/sounds/product_director_land.ogg'},
+      // { name: SOUND_GAME_DESIGNER_LAND, path: '/sounds/game_designer_land.ogg', volume: 0.5 },
+      { name: SOUND_AUDIO_PROGRAMMER_LAND, path: '/sounds/audio_programmer_land.ogg', volume: 0.5 },
+      // { name: SOUND_CREATIVE_LEAD_LAND, path: '/sounds/creative_lead_land.ogg'},
+      // { name: SOUND_SOUND_DIRECTOR_LAND, path: '/sounds/sound_director_land.ogg'},
     ];
 
     Promise.all(
       soundsToLoad.map(sound => 
-        audioManager.loadSound(sound.name, sound.path, sound.loop, sound.volume)
+        audioManager.loadSound(sound.name, sound.path, sound.loop)
       )
     ).then(() => {
       console.log("All sounds loaded via AudioManager");

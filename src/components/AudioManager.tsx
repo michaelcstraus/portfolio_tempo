@@ -25,7 +25,7 @@ const AudioManagerComponent: FC<AudioManagerProps> = ({ soundsToLoad }) => {
           src: [soundInfo.path],
           loop: soundInfo.loop || false,
           volume: soundInfo.volume || 1.0,
-          html5: true, // Often helps with browser compatibility and resource management
+          //html5: true, // Often helps with browser compatibility and resource management
           onload: () => {
             console.log(`Sound loaded: ${soundInfo.name}`);
           },
@@ -79,7 +79,7 @@ class AudioManager {
     return AudioManager.instance;
   }
 
-  public loadSound(name: string, path: string, loop: boolean = false, volume: number = 1.0, html5: boolean = true): Promise<void> {
+  public loadSound(name: string, path: string, loop: boolean = false, volume: number = 1.0, html5: boolean = false): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.sounds[name]) {
         console.log(`Sound '${name}' already loaded.`);
