@@ -101,6 +101,9 @@ export default function Home() {
     'text-glow-style-5',
   ];
 
+  const [isMobile, setIsMobile] = useState(false);
+  const initialMobileLoadRef = useRef(true); // To track if auto-start has occurred
+
   const generateGlitchedText = (text: string, intensity: number = 0.7) => {
     const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
     return text
@@ -604,9 +607,10 @@ export default function Home() {
   }, [displayedTitle, gameDesignerPaused]); // startGlitchSequence is omitted as it's not memoized; logic relies on other deps.
 
   const handleMouseEnter = () => {
-    // If a winner message is currently being displayed for the Game Designer title,
-    // don't interrupt it by starting a new glitch sequence.
-    // The winner message has its own timeout to transition.
+    if (isMobile) {
+      return; // On mobile, animations auto-start and run; mouse enter does nothing extra.
+    }
+    // Original desktop logic for mouse enter:
     if (showWinnerMessage && PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE) {
       return;
     }
@@ -614,53 +618,41 @@ export default function Home() {
   };
 
   const handleMouseLeave = () => {
-    // If the Game Designer game was won and the winner message is currently showing,
-    // we want to preserve its display and the timeout that will transition away from it.
-    // We should only clear other incidental animation timers.
+    if (isMobile) {
+      return; // On mobile, animations auto-start and run; mouse leave does not stop them.
+    }
+    // Original desktop logic for mouse leave:
     if (PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE && showWinnerMessage) {
       if (glitchEffectIntervalRef.current) {
         clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
       }
-      clearLetterAnimationTimeouts(); // Stop any Audio Programmer letter punches
-      clearCreativeLeadAnimationTimeouts(); // Stop any Creative Lead color cycling
-      
-      // DO NOT call cleanUpTimers() here as it would clear nextTitleTimeoutRef.
-      // DO NOT reset displayedTitle or other Game Designer specific states here.
-      return; // Exit early to let the winner sequence complete.
+      clearLetterAnimationTimeouts();
+      clearCreativeLeadAnimationTimeouts();
+      return;
     }
-
-    // Standard cleanup for all other scenarios:
-    // - Mouse leave during a normal title display (not Game Designer win).
-    // - Mouse leave during an unfinished/abandoned Game Designer game.
-    // - Mouse leave during other animated titles.
-    cleanUpTimers(); // This will clear nextTitleTimeoutRef, glitchEffectIntervalRef, and all game/animation timers.
-
+    cleanUpTimers();
     const lastSettledTitle = PROFESSIONAL_TITLES[activeTitleIndexRef.current];
-    setDisplayedTitle(lastSettledTitle); // Revert to the actual settled title
+    setDisplayedTitle(lastSettledTitle);
     setIsGlowing(false);
     setCurrentGlowClass('');
     setIsLetterAnimating(false);
     setIsCreativeLeadAnimating(false);
-    // isGameDesignerAnimating will be set based on whether lastSettledTitle is GAME_DESIGNER_TITLE below.
-
-    // Reset animation states for specific titles if they were the ones settled on
     if (lastSettledTitle === AUDIO_PROGRAMMER_TITLE) {
       setAnimatedLetters(AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false })));
     } else {
       setAnimatedLetters([]);
     }
-
     if (lastSettledTitle === CREATIVE_LEAD_TITLE) {
       const creativeWordLength = "Creative".length;
       setCreativeLeadLetters(CREATIVE_LEAD_TITLE.split('').map((char, index) => {
         let finalColorForLetter;
         if (index < creativeWordLength) {
-          finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[0];
         } else if (char === ' ') {
           finalColorForLetter = 'transparent';
         } else {
-          finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[1];
         }
         return {
           char,
@@ -672,34 +664,27 @@ export default function Home() {
     } else {
       setCreativeLeadLetters([]);
     }
-
     if (lastSettledTitle === GAME_DESIGNER_TITLE) {
-      // This case means the mouse left when Game Designer was the settled title,
-      // but NOT during a winner message display (due to the early return above).
-      // So, game was paused or abandoned mid-play.
-      setIsGameDesignerAnimating(true); // Keep interactive styling for Game Designer title
-      setGameDesignerPaused(true);    // Revert to paused state, ready for next interaction or auto-advance
+      setIsGameDesignerAnimating(true);
+      setGameDesignerPaused(true);
       setGameDesignerLetters(
         GAME_DESIGNER_TITLE.split('').map((char, idx) => ({
           char, id: `${char}-${idx}`, status: 'neutral' as GameLetterStatus, key: `${char}-${idx}-${Date.now()}`
         }))
-      ); // Reset letters
-      gameWonRef.current = false; // Ensure win flag is false
-      setShowWinnerMessage(false); // Ensure winner message is hidden
-      // Reset game times as the game was abandoned or not completed
+      );
+      gameWonRef.current = false;
+      setShowWinnerMessage(false);
       setGameStartTime(null);
       setGameEndTime(null);
       setCurrentGameTime(0);
     } else {
-      // Settling on a title that is NOT Game Designer.
-      // Ensure all Game Designer specific states are fully reset.
       setIsGameDesignerAnimating(false);
       setGameDesignerLetters([]);
       gameWonRef.current = false;
       setGameDesignerPaused(false);
-      setShowWinnerMessage(false); 
-      setGameStartTime(null); 
-      setGameEndTime(null); 
+      setShowWinnerMessage(false);
+      setGameStartTime(null);
+      setGameEndTime(null);
       setCurrentGameTime(0);
     }
   };
@@ -813,6 +798,47 @@ export default function Home() {
       Howler.mute(false); 
     };
   }, []);
+
+  // Effect for mobile detection
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+    };
+    checkIsMobile(); // Initial check
+    window.addEventListener('resize', checkIsMobile);
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  // Effect to auto-start animations on mobile
+  useEffect(() => {
+    let autoStartTimer: NodeJS.Timeout | null = null;
+
+    if (isMobile && initialMobileLoadRef.current) {
+      console.log("Mobile device detected, scheduling auto-start of title sequence in 3 seconds.");
+      autoStartTimer = setTimeout(() => {
+        console.log("Auto-starting title sequence now (mobile).");
+        startGlitchSequence(); 
+        initialMobileLoadRef.current = false; // Mark as auto-started only after the timeout runs
+      }, 3000);
+    } else {
+      // If it becomes not mobile, or if initialMobileLoadRef is already false, clear any pending timer.
+      if (autoStartTimer) {
+        clearTimeout(autoStartTimer);
+      }
+      // If it becomes not mobile, and the sequence had started, it would continue until mouse leave on desktop.
+      // We don't need to explicitly stop it here unless that's desired behavior.
+    }
+
+    return () => {
+      // Cleanup: clear the timeout if the component unmounts or isMobile changes before it fires
+      if (autoStartTimer) {
+        clearTimeout(autoStartTimer);
+        console.log("Cleared pending auto-start timer for mobile.");
+      }
+    };
+  }, [isMobile]); // Run when isMobile state changes
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
