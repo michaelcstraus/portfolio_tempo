@@ -19,7 +19,7 @@ const CREATIVE_LEAD_TITLE = "Creative Lead";
 const GAME_DESIGNER_TITLE = "Game Designer";
 
 const PROFESSIONAL_TITLES = [
-  "Product Director",
+  "Product Director...",
   GAME_DESIGNER_TITLE,
   AUDIO_PROGRAMMER_TITLE,
   CREATIVE_LEAD_TITLE,
