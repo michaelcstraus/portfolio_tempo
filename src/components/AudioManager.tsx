@@ -111,14 +111,20 @@ class AudioManager {
     const sound = this.sounds[name];
     if (sound) {
       if (!allowOverlap && sound.playing()) {
-        // console.log(`Sound '${name}' is already playing and overlap is not allowed. Stopping first.`);
-        // sound.stop(); // Option: stop existing instance
-        return null; // Option: don't play new instance
+        return null; 
       }
+
+      // If it's the glitch sound, seek to a random position before playing
+      if (name === 'glitch') { // Assuming 'glitch' is the hardcoded name for the glitch sound
+        const duration = sound.duration();
+        if (duration && duration > 0) {
+          const randomSeekTime = Math.random() * duration;
+          sound.seek(randomSeekTime);
+          console.log(`Seeking glitch sound to: ${randomSeekTime.toFixed(2)}s`);
+        }
+      }
+
       const soundId = sound.play();
-      // console.log(`Playing sound: ${name}, ID: ${soundId}`);
-      // sound.on('play', () => console.log(`Actually playing ${name} with id ${soundId}` ) );
-      // sound.on('playerror', (id, err) => console.error(`Play error for ${name}, id ${id}`, err));
       return soundId;
     } else {
       console.warn(`Sound '${name}' not found or not loaded.`);
