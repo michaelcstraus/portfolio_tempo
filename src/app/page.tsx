@@ -754,7 +754,7 @@ export default function Home() {
       { name: SOUND_GAME_WIN, path: '/sounds/8bitterm.ogg', volume: 0.5 },
       // { name: SOUND_PRODUCT_DIRECTOR_LAND, path: '/sounds/product_director_land.ogg'},
       // { name: SOUND_GAME_DESIGNER_LAND, path: '/sounds/game_designer_land.ogg', volume: 0.5 },
-      { name: SOUND_AUDIO_PROGRAMMER_LAND, path: '/sounds/audio_programmer_land.ogg', volume: 0.5 },
+      { name: SOUND_AUDIO_PROGRAMMER_LAND, path: '/sounds/audio_programmer_land.mp3', volume: .5 },
       // { name: SOUND_CREATIVE_LEAD_LAND, path: '/sounds/creative_lead_land.ogg'},
       // { name: SOUND_SOUND_DIRECTOR_LAND, path: '/sounds/sound_director_land.ogg'},
     ];
