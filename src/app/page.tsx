@@ -15,6 +15,8 @@ import { audioManager } from '@/components/AudioManager';
 import { Howler } from 'howler';
 import MuteButton from "@/components/MuteButton";
 
+const USER_MUTE_PREFERENCE_KEY = 'userMutePreference';
+
 const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
 const GAME_DESIGNER_TITLE = "Game Designer";
@@ -801,7 +803,7 @@ export default function Home() {
     };
   }, []);
 
-  // Effect for mobile detection
+  // Effect for mobile detection and initializing mute state from localStorage
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(navigator.maxTouchPoints > 0 || window.innerWidth < 768);
@@ -809,8 +811,18 @@ export default function Home() {
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
 
-    // No need to sync with Howler.mute() for initial state if we assume unmuted start.
-    // Howler.js is unmuted by default.
+    // Initialize mute state from localStorage
+    const savedMutePreference = localStorage.getItem(USER_MUTE_PREFERENCE_KEY);
+    if (savedMutePreference !== null) {
+      const muted = JSON.parse(savedMutePreference);
+      setIsMuted(muted);
+      Howler.mute(muted);
+      console.log(`Loaded mute preference from localStorage: ${muted ? 'Muted' : 'Unmuted'}`);
+    } else {
+      // If no preference, ensure Howler matches our default state (which is unmuted)
+      Howler.mute(isMuted); // isMuted is initially false
+      console.log(`No mute preference in localStorage, default: ${isMuted ? 'Muted' : 'Unmuted'}`);
+    }
 
     return () => {
       window.removeEventListener('resize', checkIsMobile);
@@ -820,37 +832,31 @@ export default function Home() {
   // Effect to auto-start animations on mobile
   useEffect(() => {
     let autoStartTimer: NodeJS.Timeout | null = null;
-
     if (isMobile && initialMobileLoadRef.current) {
       console.log("Mobile device detected, scheduling auto-start of title sequence in 3 seconds.");
       autoStartTimer = setTimeout(() => {
         console.log("Auto-starting title sequence now (mobile).");
         startGlitchSequence(); 
-        initialMobileLoadRef.current = false; // Mark as auto-started only after the timeout runs
+        initialMobileLoadRef.current = false;
       }, 3000);
     } else {
-      // If it becomes not mobile, or if initialMobileLoadRef is already false, clear any pending timer.
-      if (autoStartTimer) {
-        clearTimeout(autoStartTimer);
-      }
-      // If it becomes not mobile, and the sequence had started, it would continue until mouse leave on desktop.
-      // We don't need to explicitly stop it here unless that's desired behavior.
+      if (autoStartTimer) clearTimeout(autoStartTimer);
     }
-
     return () => {
-      // Cleanup: clear the timeout if the component unmounts or isMobile changes before it fires
-      if (autoStartTimer) {
-        clearTimeout(autoStartTimer);
-        console.log("Cleared pending auto-start timer for mobile.");
-      }
+      if (autoStartTimer) clearTimeout(autoStartTimer);
     };
-  }, [isMobile]); // Run when isMobile state changes
+  }, [isMobile]); // This effect should depend on isMobile
 
   const toggleMute = () => {
     const newMuteState = !isMuted;
-    Howler.mute(newMuteState); // Set Howler's global mute state
-    setIsMuted(newMuteState); // Update our component's state
-    console.log(newMuteState ? "Audio Muted" : "Audio Unmuted");
+    Howler.mute(newMuteState);
+    setIsMuted(newMuteState);
+    try {
+      localStorage.setItem(USER_MUTE_PREFERENCE_KEY, JSON.stringify(newMuteState));
+      console.log(`Saved mute preference to localStorage: ${newMuteState ? 'Muted' : 'Unmuted'}`);
+    } catch (error) {
+      console.error("Failed to save mute preference to localStorage:", error);
+    }
   };
 
   return (
