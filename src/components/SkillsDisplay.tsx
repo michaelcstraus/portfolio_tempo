@@ -9,7 +9,6 @@ import { Gamepad2, Code, Palette, Users, Brain, Film } from "lucide-react";
 
 interface Skill {
   name: string;
-  level: number;
   category: string;
 }
 
@@ -28,29 +27,29 @@ interface SkillsDisplayProps {
 
 const SkillsDisplay = ({
   skills = [
-    { name: "Team Leadership", level: 90, category: "soft" },
-    { name: "Project Management", level: 85, category: "soft" },
-    { name: "Product Management", level: 85, category: "soft" },
-    { name: "Innovation Lead", level: 85, category: "soft" },
-    { name: "Vendor Management", level: 75, category: "soft" },
-    { name: "Client Management", level: 70, category: "soft" },
-    { name: "Unity", level: 90, category: "technical" },
-    { name: "JavaScript", level: 80, category: "technical" },
-    { name: "React", level: 80, category: "technical" },
-    { name: "LLM/AI", level: 85, category: "technical" },
-    { name: "ThreeJS", level: 75, category: "technical" },
-    { name: "Python", level: 80, category: "technical" },
-    { name: "NodeJS", level: 75, category: "technical" },
-    { name: "C#", level: 80, category: "technical" },
-    { name: "FMOD", level: 65, category: "technical" },
-    { name: "HowlerJS", level: 65, category: "technical" },
-    { name: "UI/UX", level: 80, category: "creative" },
-    { name: "Art Directing", level: 85, category: "creative" },
-    { name: "Teaching/Mentorship", level: 85, category: "soft" },
-    { name: "Music Composition", level: 90, category: "creative" },
-    { name: "Sound Design", level: 85, category: "creative" },
-    { name: "Music Directing", level: 90, category: "creative" },
-    { name: "Storyboarding", level: 90, category: "creative" },
+    { name: "Team Leadership", category: "soft" },
+    { name: "Project Management", category: "soft" },
+    { name: "Product Management", category: "soft" },
+    { name: "Innovation Lead", category: "soft" },
+    { name: "Vendor Management", category: "soft" },
+    { name: "Client Management", category: "soft" },
+    { name: "Unity", category: "technical" },
+    { name: "JavaScript", category: "technical" },
+    { name: "React", category: "technical" },
+    { name: "LLM/AI", category: "technical" },
+    { name: "ThreeJS", category: "technical" },
+    { name: "Python", category: "technical" },
+    { name: "NodeJS", category: "technical" },
+    { name: "C#", category: "technical" },
+    { name: "FMOD", category: "technical" },
+    { name: "HowlerJS", category: "technical" },
+    { name: "UI/UX", category: "creative" },
+    { name: "Art Directing", category: "creative" },
+    { name: "Teaching/Mentorship", category: "soft" },
+    { name: "Music Composition", category: "creative" },
+    { name: "Sound Design", category: "creative" },
+    { name: "Music Directing", category: "creative" },
+    { name: "Storyboarding", category: "creative" },
   ],
   experiences = [
     {
@@ -66,7 +65,7 @@ const SkillsDisplay = ({
       company: "Boom Entertainment",
       period: "2021 - 2022",
       description:
-        "Drove the creative vision and early development of new game concepts within Boom’s in-house studio. Led a small, agile innovation team focused on rapid prototyping, feature experimentation, and long-term engagement mechanics. Collaborated closely with math, engineering, and product teams to test ideas, build playable demos, and validate concepts with data. Helped define the future roadmap by translating vague ideas into scalable, player-centric experiences.",
+        "Drove the creative vision and early development of new game concepts within Boom's in-house studio. Led a small, agile innovation team focused on rapid prototyping, feature experimentation, and long-term engagement mechanics. Collaborated closely with math, engineering, and product teams to test ideas, build playable demos, and validate concepts with data. Helped define the future roadmap by translating vague ideas into scalable, player-centric experiences.",
       skills: [
         "Game Design",
         "UI/UX",
@@ -166,14 +165,7 @@ const SkillsDisplay = ({
                   <div key={index} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium">{skill.name}</h3>
-                      <span className="text-sm text-muted-foreground">
-                        {skill.level}%
-                      </span>
                     </div>
-                    <Progress
-                      value={skill.level}
-                      className="h-2 bg-muted transition-all duration-1000 ease-in-out"
-                    />
                   </div>
                 ))}
             </div>

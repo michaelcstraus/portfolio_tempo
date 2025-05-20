@@ -11,6 +11,8 @@ import StageDiveShowcase from "@/components/StageDiveShowcase";
 import MusicSection from "@/components/MusicSection";
 import ContactSection from "@/components/ContactSection";
 import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide-react";
+import { audioManager } from '@/components/AudioManager';
+import { Howler } from 'howler';
 
 const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
@@ -26,6 +28,17 @@ const PROFESSIONAL_TITLES = [
 
 const CHAOTIC_COLORS = ['#FF1493', '#FF8C00', '#ADFF2F', '#00BFFF', '#BA55D3', '#FFD700'];
 const HARMONIOUS_PALETTE_CL = ['#ec4899', '#22d3ee', '#a855f7', '#ffffff']; // Pink, Cyan, Purple, White
+
+// Define sound names for consistency
+const SOUND_GLITCH = 'glitch';
+const SOUND_POP = 'pop';
+const SOUND_GAME_MUSIC = 'gameMusic';
+const SOUND_GAME_WIN = 'gameWin';
+// const SOUND_PRODUCT_DIRECTOR_LAND = 'productDirectorLand';
+// const SOUND_GAME_DESIGNER_LAND = 'gameDesignerLand';
+const SOUND_AUDIO_PROGRAMMER_LAND = 'audioProgrammerLand';
+// const SOUND_CREATIVE_LEAD_LAND = 'creativeLeadLand';
+// const SOUND_SOUND_DIRECTOR_LAND = 'soundDirectorLand';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("games");
@@ -54,8 +67,7 @@ export default function Home() {
   type GameLetter = { char: string; id: string; status: GameLetterStatus; key: string };
   const [gameDesignerLetters, setGameDesignerLetters] = useState<GameLetter[]>([]);
   const gameRoundTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const popSoundRef = useRef<HTMLAudioElement | null>(null); // Sound for letter pop
-  const gameWonRef = useRef(false); // <-- ADDED
+  const gameWonRef = useRef(false);
 
   // New state for game timer and winner message
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
@@ -69,18 +81,10 @@ export default function Home() {
   // Add a state to track if we're paused on the Game Designer title
   const [gameDesignerPaused, setGameDesignerPaused] = useState(false);
 
-  // --- Start of Glitch Text Effect Code ---
   const glitchEffectIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const nextTitleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Audio refs
-  const glitchSoundRef = useRef<HTMLAudioElement | null>(null);
-  const settleSoundRef = useRef<HTMLAudioElement | null>(null);
   const isGlitchSoundPlayingRef = useRef(false);
-  const gameBackgroundMusicRef = useRef<HTMLAudioElement | null>(null); // Background music for game
-  const gameWinSoundRef = useRef<HTMLAudioElement | null>(null); // <-- ADDED for win sound
-  
-  // Ref to track if game music was playing before tab was hidden
   const wasGameMusicPlayingBeforeHiddenRef = useRef(false);
 
   // Refs to mirror state for access in visibility handler
@@ -88,13 +92,6 @@ export default function Home() {
   const displayedTitleRef = useRef(displayedTitle);
   const gameDesignerPausedRef = useRef(gameDesignerPaused);
   const showWinnerMessageRef = useRef(showWinnerMessage);
-
-  // Add new audio refs for title landing sounds
-  const productDirectorLandSoundRef = useRef<HTMLAudioElement | null>(null);
-  const gameDesignerLandSoundRef = useRef<HTMLAudioElement | null>(null);
-  const audioProgrammerLandSoundRef = useRef<HTMLAudioElement | null>(null);
-  const creativeLeadLandSoundRef = useRef<HTMLAudioElement | null>(null);
-  const soundDirectorLandSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const GLOW_CLASSES = [
     'text-glow-style-1',
@@ -132,11 +129,7 @@ export default function Home() {
     if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current); // Clear live timer
     liveGameTimerIntervalRef.current = null;
     
-    // Stop background music if it's playing
-    if (gameBackgroundMusicRef.current) {
-      gameBackgroundMusicRef.current.pause();
-      gameBackgroundMusicRef.current.currentTime = 0;
-    }
+    audioManager.stopSound(SOUND_GAME_MUSIC);
   };
 
   const cleanUpTimers = () => {
@@ -145,9 +138,8 @@ export default function Home() {
     glitchEffectIntervalRef.current = null;
     nextTitleTimeoutRef.current = null;
 
-    if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
-      glitchSoundRef.current.pause();
-      glitchSoundRef.current.currentTime = 0;
+    if (isGlitchSoundPlayingRef.current) {
+      audioManager.stopSound(SOUND_GLITCH);
       isGlitchSoundPlayingRef.current = false;
     }
     clearLetterAnimationTimeouts();
@@ -157,36 +149,25 @@ export default function Home() {
 
   const endGameDesignerGame = (gameWon: boolean = false) => {
     setIsGameDesignerAnimating(false);
-    if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current); // Stop live timer
+    if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current); 
     liveGameTimerIntervalRef.current = null;
     
-    // Stop the background music
-    if (gameBackgroundMusicRef.current) {
-      gameBackgroundMusicRef.current.pause();
-      gameBackgroundMusicRef.current.currentTime = 0;
-    }
+    audioManager.stopSound(SOUND_GAME_MUSIC);
     
-    // Ensure the game's own round timer is stopped
     if (gameRoundTimerRef.current) clearTimeout(gameRoundTimerRef.current);
     gameRoundTimerRef.current = null;
 
-    // setCurrentGameTime(0); // Reset live display, or let winner message show final from gameEndTime
-
     if (gameWon) {
-      // Play the win sound
-      if (gameWinSoundRef.current) {
-        gameWinSoundRef.current.currentTime = 0;
-        !document.hidden && gameWinSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
-      }
+      if (!document.hidden) audioManager.playSound(SOUND_GAME_WIN);
       setShowWinnerMessage(true);
       nextTitleTimeoutRef.current = setTimeout(() => {
         setShowWinnerMessage(false); 
-        setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset all game times
+        setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0);
         startGlitchSequence();
       }, 2500); 
     } else {
       setShowWinnerMessage(false);
-      setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0); // Reset all game times
+      setGameStartTime(null); setGameEndTime(null); setCurrentGameTime(0);
       nextTitleTimeoutRef.current = setTimeout(startGlitchSequence, 800 + Math.random() * 500); 
     }
   };
@@ -200,7 +181,6 @@ export default function Home() {
           console.log("All letters popped in startGameDesignerRound - Setting game end state for useEffect to handle.");
           setGameEndTime(Date.now());
           gameWonRef.current = true;
-          // REMOVED: setTimeout for endGameDesignerGame(true)
         }
         return prevLetters; // Important: if game is over, don't light up new letters
       }
@@ -281,10 +261,8 @@ export default function Home() {
 
   // Update the handleLetterClick function
   const handleLetterClick = (letterId: string) => {
-    // Get the letter being clicked
     const clickedLetter = gameDesignerLetters.find(l => l.id === letterId);
     
-    // If we're in paused state and the clicked letter is 'good' (lit), start the game
     if (gameDesignerPaused && displayedTitle === GAME_DESIGNER_TITLE && clickedLetter?.status === 'good') {
       if (gameDesignerAutoAdvanceRef.current) {
         clearTimeout(gameDesignerAutoAdvanceRef.current);
@@ -297,10 +275,7 @@ export default function Home() {
       setGameStartTime(Date.now());
       setCurrentGameTime(0);
       
-      if (gameBackgroundMusicRef.current) {
-        gameBackgroundMusicRef.current.currentTime = 0;
-        !document.hidden && gameBackgroundMusicRef.current.play().catch(e => console.error("Game music error", e));
-      }
+      if (!document.hidden) audioManager.playSound(SOUND_GAME_MUSIC);
       
       if (liveGameTimerIntervalRef.current) clearInterval(liveGameTimerIntervalRef.current);
       liveGameTimerIntervalRef.current = setInterval(() => {
@@ -312,10 +287,7 @@ export default function Home() {
         });
       }, 100);
       
-      if (popSoundRef.current) {
-        popSoundRef.current.currentTime = 0;
-        !document.hidden && popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
-      }
+      if (!document.hidden) audioManager.playSound(SOUND_POP);
       
       setGameDesignerLetters(prevLetters => {
         const newLetters = prevLetters.map(l => {
@@ -336,7 +308,6 @@ export default function Home() {
           if (!gameEndTime) { // Ensure gameEndTime is set only once
             setGameEndTime(Date.now());
             gameWonRef.current = true;
-            // REMOVED: setTimeout for endGameDesignerGame(true)
           }
         } else {
           const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
@@ -358,15 +329,12 @@ export default function Home() {
       const letterBeforeClick = gameDesignerLetters.find(l => l.id === letterId);
       
       if (letterBeforeClick && letterBeforeClick.status === 'good') {
-        if (popSoundRef.current) {
-          popSoundRef.current.currentTime = 0;
-          !document.hidden && popSoundRef.current.play().catch(e => console.error("Pop sound error", e));
-        }
+        if (!document.hidden) audioManager.playSound(SOUND_POP);
         
         setGameDesignerLetters(prevLetters => {
           const newLetters = prevLetters.map(l => {
             if (l.id === letterId && l.status === 'good') {
-              return { ...l, status: 'popped'as GameLetterStatus };
+              return { ...l, status: 'popped' as GameLetterStatus };
             }
             return l;
           });
@@ -382,7 +350,6 @@ export default function Home() {
             if (!gameEndTime) { // Ensure gameEndTime is set only once
               setGameEndTime(Date.now());
               gameWonRef.current = true;
-              // REMOVED: setTimeout for endGameDesignerGame(true)
             }
           } else {
             const remainingLitLetters = newLetters.filter(l => l.status === 'good' && l.char !== ' ');
@@ -487,11 +454,8 @@ export default function Home() {
 
     glitchEffectIntervalRef.current = setInterval(() => {
       if (iterations < maxIterations) {
-        if (glitchSoundRef.current && !isGlitchSoundPlayingRef.current) {
-          if (glitchSoundRef.current.duration && Number.isFinite(glitchSoundRef.current.duration)) {
-            try { const randomStartTime = Math.random() * glitchSoundRef.current.duration; glitchSoundRef.current.currentTime = randomStartTime; } catch (error) { console.error("Error setting random currentTime for glitch sound:", error); if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
-          } else { if (glitchSoundRef.current) glitchSoundRef.current.currentTime = 0; }
-          !document.hidden && glitchSoundRef.current.play().catch(error => console.error("Error playing glitch sound:", error));
+        if (!isGlitchSoundPlayingRef.current && !document.hidden) {
+          audioManager.playSound(SOUND_GLITCH);
           isGlitchSoundPlayingRef.current = true;
         }
         setDisplayedTitle(generateGlitchedText(targetTitle));
@@ -500,28 +464,18 @@ export default function Home() {
         if (glitchEffectIntervalRef.current) clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
         
-        if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
-          glitchSoundRef.current.pause();
-          glitchSoundRef.current.currentTime = 0;
+        if (isGlitchSoundPlayingRef.current) {
+          audioManager.stopSound(SOUND_GLITCH);
           isGlitchSoundPlayingRef.current = false;
         }
 
         // Play the appropriate landing sound based on the target title
-        if (targetTitle === GAME_DESIGNER_TITLE && gameDesignerLandSoundRef.current) {
-          gameDesignerLandSoundRef.current.currentTime = 0;
-          !document.hidden && gameDesignerLandSoundRef.current.play().catch(error => console.error("Error playing game designer land sound:", error));
-        } else if (targetTitle === AUDIO_PROGRAMMER_TITLE && audioProgrammerLandSoundRef.current) {
-          audioProgrammerLandSoundRef.current.currentTime = 0;
-          !document.hidden && audioProgrammerLandSoundRef.current.play().catch(error => console.error("Error playing audio programmer land sound:", error));
-        } else if (targetTitle === CREATIVE_LEAD_TITLE && creativeLeadLandSoundRef.current) {
-          creativeLeadLandSoundRef.current.currentTime = 0;
-          !document.hidden && creativeLeadLandSoundRef.current.play().catch(error => console.error("Error playing creative lead land sound:", error));
-        } else if (targetTitle === "Product Director" && productDirectorLandSoundRef.current) {
-          productDirectorLandSoundRef.current.currentTime = 0;
-          !document.hidden && productDirectorLandSoundRef.current.play().catch(error => console.error("Error playing product director land sound:", error));
-        } else if (targetTitle === "Sound Director" && soundDirectorLandSoundRef.current) {
-          soundDirectorLandSoundRef.current.currentTime = 0;
-          !document.hidden && soundDirectorLandSoundRef.current.play().catch(error => console.error("Error playing sound director land sound:", error));
+        if (!document.hidden) {
+            // if (targetTitle === GAME_DESIGNER_TITLE) audioManager.playSound(SOUND_GAME_DESIGNER_LAND);
+            if (targetTitle === AUDIO_PROGRAMMER_TITLE) audioManager.playSound(SOUND_AUDIO_PROGRAMMER_LAND);
+            // else if (targetTitle === CREATIVE_LEAD_TITLE) audioManager.playSound(SOUND_CREATIVE_LEAD_LAND);
+            // else if (targetTitle === "Product Director") audioManager.playSound(SOUND_PRODUCT_DIRECTOR_LAND);
+            // else if (targetTitle === "Sound Director") audioManager.playSound(SOUND_SOUND_DIRECTOR_LAND);
         }
         
         activeTitleIndexRef.current = nextIndex;
@@ -537,7 +491,6 @@ export default function Home() {
         setIsLetterAnimating(false);
         setIsCreativeLeadAnimating(false);
         setIsGameDesignerAnimating(false); // Explicitly set to false before specific title logic
-        // setGameDesignerPaused(false); // This will be set to true specifically for Game Designer if it's the target
 
         if (targetTitle === GAME_DESIGNER_TITLE) {
           setDisplayedTitle(targetTitle); // Set title *after* glitch
@@ -551,7 +504,6 @@ export default function Home() {
               key: `${char}-${idx}-${Date.now()}`
             }))
           );
-          // No nextTitleTimeoutRef for Game Designer to pause here; auto-advance useEffect will handle it.
         } else if (targetTitle === AUDIO_PROGRAMMER_TITLE) {
           setDisplayedTitle(targetTitle); // Set title *after* glitch
           setGameDesignerPaused(false); // Ensure GD is not paused
@@ -635,6 +587,17 @@ export default function Home() {
     if (displayedTitle === GAME_DESIGNER_TITLE && !gameDesignerPaused && forceGameDesignerAdvanceRef.current) {
       console.log("AUTO-ADVANCE: Detected forced advance signal. Calling startGlitchSequence.");
       forceGameDesignerAdvanceRef.current = false; // Reset the flag
+      // Check if a game was in progress and "abandon" it by stopping music etc.
+      if (audioManager.isPlaying(SOUND_GAME_MUSIC)) {
+        audioManager.stopSound(SOUND_GAME_MUSIC);
+      }
+      // Reset game state as it's being auto-advanced away
+      setGameStartTime(null);
+      setGameEndTime(null);
+      setCurrentGameTime(0);
+      gameWonRef.current = false;
+      setShowWinnerMessage(false);
+
       startGlitchSequence();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -741,154 +704,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    glitchSoundRef.current = new Audio('/sounds/glitch_loop.wav'); 
-    if (glitchSoundRef.current) {
-      glitchSoundRef.current.loop = true;
-    }
-    settleSoundRef.current = new Audio('/sounds/land.wav');
-    popSoundRef.current = new Audio('/sounds/pop.wav');
-    gameBackgroundMusicRef.current = new Audio('/sounds/8bitloop.mp3');
-    if (gameBackgroundMusicRef.current) {
-      gameBackgroundMusicRef.current.loop = true;
-    }
-    gameWinSoundRef.current = new Audio('/sounds/8bitterm.ogg'); // <-- INITIALIZE win sound
-    if (gameWinSoundRef.current) {
-      gameWinSoundRef.current.loop = false; // Ensure it does not loop
-    }
-
-    // Initialize title landing sounds
-    productDirectorLandSoundRef.current = new Audio('/sounds/product_director_land.ogg');
-    gameDesignerLandSoundRef.current = new Audio('/sounds/game_designer_land.ogg');
-    audioProgrammerLandSoundRef.current = new Audio('/sounds/audio_programmer_land.ogg');
-    creativeLeadLandSoundRef.current = new Audio('/sounds/creative_lead_land.ogg');
-    soundDirectorLandSoundRef.current = new Audio('/sounds/sound_director_land.ogg');
-
-    const handleVisibilityChange = () => {
-      const allOneShotSoundRefs = [
-        settleSoundRef, popSoundRef, gameWinSoundRef,
-        productDirectorLandSoundRef, gameDesignerLandSoundRef, audioProgrammerLandSoundRef,
-        creativeLeadLandSoundRef, soundDirectorLandSoundRef
-      ];
-
-      if (document.hidden) {
-        console.log("Tab hidden, pausing audio");
-        // Glitch Sound
-        if (glitchSoundRef.current && isGlitchSoundPlayingRef.current) {
-          glitchSoundRef.current.pause();
-          isGlitchSoundPlayingRef.current = false; // Allow main loop to restart if active on focus
-        }
-        // Game Background Music
-        if (gameBackgroundMusicRef.current && !gameBackgroundMusicRef.current.paused) {
-          gameBackgroundMusicRef.current.pause();
-          wasGameMusicPlayingBeforeHiddenRef.current = true;
-        }
-        // One-shot sounds
-        allOneShotSoundRefs.forEach(audioRef => {
-          if (audioRef.current && !audioRef.current.paused) {
-            audioRef.current.pause();
-          }
-        });
-      } else {
-        console.log("Tab visible, resuming audio if needed");
-        // Game Background Music (resume if it was playing and game is still active according to refs)
-        if (wasGameMusicPlayingBeforeHiddenRef.current) {
-          if (gameBackgroundMusicRef.current &&
-              isGameDesignerAnimatingRef.current &&
-              displayedTitleRef.current === GAME_DESIGNER_TITLE &&
-              !gameDesignerPausedRef.current &&
-              !showWinnerMessageRef.current
-             ) {
-            gameBackgroundMusicRef.current.play().catch(e => console.error("Error resuming game music:", e));
-          }
-          wasGameMusicPlayingBeforeHiddenRef.current = false;
-        }
-        // Glitch sound is handled by its own loop reacting to isGlitchSoundPlayingRef.current being false.
-        // One-shot sounds are not automatically resumed.
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      cleanUpTimers();
-      if (glitchSoundRef.current) {
-        glitchSoundRef.current.pause();
-        if (glitchSoundRef.current) {
-          glitchSoundRef.current.srcObject = null; 
-          glitchSoundRef.current.src = '';
-        }
-      }
-      if (settleSoundRef.current) {
-        settleSoundRef.current.pause();
-        if (settleSoundRef.current) {
-          settleSoundRef.current.srcObject = null;
-          settleSoundRef.current.src = '';
-        }
-      }
-      if (popSoundRef.current) {
-        popSoundRef.current.pause();
-        if (popSoundRef.current) {
-          popSoundRef.current.srcObject = null;
-          popSoundRef.current.src = '';
-        }
-      }
-      if (gameBackgroundMusicRef.current) {
-        gameBackgroundMusicRef.current.pause();
-        if (gameBackgroundMusicRef.current) {
-          gameBackgroundMusicRef.current.srcObject = null;
-          gameBackgroundMusicRef.current.src = '';
-        }
-      }
-      if (gameWinSoundRef.current) { // <-- CLEANUP for win sound
-        gameWinSoundRef.current.pause();
-        if (gameWinSoundRef.current) {
-            gameWinSoundRef.current.srcObject = null;
-            gameWinSoundRef.current.src = '';
-        }
-      }
-      // Clean up title landing sounds
-      if (productDirectorLandSoundRef.current) {
-        productDirectorLandSoundRef.current.pause();
-        productDirectorLandSoundRef.current.srcObject = null;
-        productDirectorLandSoundRef.current.src = '';
-      }
-      if (gameDesignerLandSoundRef.current) {
-        gameDesignerLandSoundRef.current.pause();
-        gameDesignerLandSoundRef.current.srcObject = null;
-        gameDesignerLandSoundRef.current.src = '';
-      }
-      if (audioProgrammerLandSoundRef.current) {
-        audioProgrammerLandSoundRef.current.pause();
-        audioProgrammerLandSoundRef.current.srcObject = null;
-        audioProgrammerLandSoundRef.current.src = '';
-      }
-      if (creativeLeadLandSoundRef.current) {
-        creativeLeadLandSoundRef.current.pause();
-        creativeLeadLandSoundRef.current.srcObject = null;
-        creativeLeadLandSoundRef.current.src = '';
-      }
-      if (soundDirectorLandSoundRef.current) {
-        soundDirectorLandSoundRef.current.pause();
-        soundDirectorLandSoundRef.current.srcObject = null;
-        soundDirectorLandSoundRef.current.src = '';
-      }
-
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      // Explicitly pause all sounds again on unmount
-      const allAudioRefsForUnmount = [
-          glitchSoundRef, settleSoundRef, popSoundRef, gameBackgroundMusicRef, gameWinSoundRef,
-          productDirectorLandSoundRef, gameDesignerLandSoundRef, audioProgrammerLandSoundRef,
-          creativeLeadLandSoundRef, soundDirectorLandSoundRef
-      ];
-      allAudioRefsForUnmount.forEach(audioRef => {
-          if (audioRef.current && !audioRef.current.paused) {
-              audioRef.current.pause();
-          }
-      });
-    };
-  }, []);
-
   // Effects to keep refs in sync with state for visibility handler
   useEffect(() => { isGameDesignerAnimatingRef.current = isGameDesignerAnimating; }, [isGameDesignerAnimating]);
   useEffect(() => { displayedTitleRef.current = displayedTitle; }, [displayedTitle]);
@@ -929,6 +744,75 @@ export default function Home() {
       });
     }
   }, [displayedTitle, gameDesignerPaused, gameDesignerLetters]);
+
+  // New useEffect to load sounds
+  useEffect(() => {
+    const soundsToLoad = [
+      { name: SOUND_GLITCH, path: '/sounds/glitch_loop.wav', loop: true, volume: 0.7 },
+      { name: SOUND_POP, path: '/sounds/pop.wav', volume: 0.7 },
+      { name: SOUND_GAME_MUSIC, path: '/sounds/8bitloop.mp3', loop: true, volume: 0.5 },
+      { name: SOUND_GAME_WIN, path: '/sounds/8bitterm.ogg', volume: 0.5 },
+      // { name: SOUND_PRODUCT_DIRECTOR_LAND, path: '/sounds/product_director_land.ogg'},
+      // { name: SOUND_GAME_DESIGNER_LAND, path: '/sounds/game_designer_land.ogg', volume: 0.5 },
+      { name: SOUND_AUDIO_PROGRAMMER_LAND, path: '/sounds/audio_programmer_land.ogg', volume: 0.5 },
+      // { name: SOUND_CREATIVE_LEAD_LAND, path: '/sounds/creative_lead_land.ogg'},
+      // { name: SOUND_SOUND_DIRECTOR_LAND, path: '/sounds/sound_director_land.ogg'},
+    ];
+
+    Promise.all(
+      soundsToLoad.map(sound => 
+        audioManager.loadSound(sound.name, sound.path, sound.loop)
+      )
+    ).then(() => {
+      console.log("All sounds loaded via AudioManager");
+    }).catch(error => {
+      console.error("Error loading one or more sounds:", error);
+    });
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log("Tab hidden, pausing/stopping Howler audio");
+        Howler.mute(true);
+
+        if (audioManager.isPlaying(SOUND_GAME_MUSIC)) {
+          audioManager.pauseSound(SOUND_GAME_MUSIC);
+          wasGameMusicPlayingBeforeHiddenRef.current = true;
+        }
+        if (isGlitchSoundPlayingRef.current && audioManager.getSound(SOUND_GLITCH)?.playing()) { 
+            audioManager.pauseSound(SOUND_GLITCH);
+        }
+
+      } else {
+        console.log("Tab visible, resuming Howler audio");
+        Howler.mute(false);
+
+        if (wasGameMusicPlayingBeforeHiddenRef.current) {
+          if (isGameDesignerAnimatingRef.current &&
+              displayedTitleRef.current === GAME_DESIGNER_TITLE &&
+              !gameDesignerPausedRef.current &&
+              !showWinnerMessageRef.current &&
+              audioManager.getSound(SOUND_GAME_MUSIC)?.state() === 'loaded') {
+            audioManager.resumeSound(SOUND_GAME_MUSIC);
+          }
+          wasGameMusicPlayingBeforeHiddenRef.current = false;
+        }
+        
+        if (isGlitchSoundPlayingRef.current && 
+            audioManager.getSound(SOUND_GLITCH)?.state() === 'loaded' && 
+            !audioManager.getSound(SOUND_GLITCH)?.playing()) {
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      console.log("Home component unmounting. Unloading all sounds.");
+      audioManager.unloadAllSounds();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      Howler.mute(false); 
+    };
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
