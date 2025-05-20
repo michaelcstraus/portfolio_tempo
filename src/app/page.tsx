@@ -13,6 +13,7 @@ import ContactSection from "@/components/ContactSection";
 import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide-react";
 import { audioManager } from '@/components/AudioManager';
 import { Howler } from 'howler';
+import MuteButton from "@/components/MuteButton";
 
 const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
@@ -103,6 +104,7 @@ export default function Home() {
 
   const [isMobile, setIsMobile] = useState(false);
   const initialMobileLoadRef = useRef(true); // To track if auto-start has occurred
+  const [isMuted, setIsMuted] = useState(false); // State for mute status
 
   const generateGlitchedText = (text: string, intensity: number = 0.7) => {
     const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
@@ -804,8 +806,12 @@ export default function Home() {
     const checkIsMobile = () => {
       setIsMobile(navigator.maxTouchPoints > 0 || window.innerWidth < 768);
     };
-    checkIsMobile(); // Initial check
+    checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
+
+    // No need to sync with Howler.mute() for initial state if we assume unmuted start.
+    // Howler.js is unmuted by default.
+
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
@@ -840,8 +846,16 @@ export default function Home() {
     };
   }, [isMobile]); // Run when isMobile state changes
 
+  const toggleMute = () => {
+    const newMuteState = !isMuted;
+    Howler.mute(newMuteState); // Set Howler's global mute state
+    setIsMuted(newMuteState); // Update our component's state
+    console.log(newMuteState ? "Audio Muted" : "Audio Unmuted");
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
+      <MuteButton isMuted={isMuted} onToggle={toggleMute} />
       {/* Hero Section */}
       <section className="w-full min-h-screen flex flex-col items-center justify-center relative bg-gradient-to-br from-purple-900 via-violet-800 to-indigo-900 text-white p-4 md:p-8">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
