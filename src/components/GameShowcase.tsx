@@ -222,9 +222,6 @@ export default function GameShowcase({
             <DialogHeader className="shrink-0 px-2">
               <DialogTitle className="flex justify-between items-center">
                 <span>{selectedGame?.title}</span>
-                <Button variant="ghost" size="icon" onClick={handleCloseGame}>
-                  <X className="h-4 w-4" />
-                </Button>
               </DialogTitle>
               <DialogDescription className="line-clamp-2">{selectedGame?.description}</DialogDescription>
             </DialogHeader>
