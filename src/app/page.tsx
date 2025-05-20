@@ -821,15 +821,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
 
         <div className="max-w-5xl mx-auto text-center z-10 space-y-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in">
+          <h1
+            className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-400">
               Michael Straus
             </span>
             <br />
             <span 
               className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating && !showWinnerMessage ? currentGlowClass : ''}`}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
               style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} 
             >
               {/* Consistent positioning wrapper */}
