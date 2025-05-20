@@ -13,6 +13,9 @@ import ContactSection from "@/components/ContactSection";
 import { ArrowDown, Gamepad2, Code, Globe, Music, User, Milestone } from "lucide-react";
 import { audioManager } from '@/components/AudioManager';
 import { Howler } from 'howler';
+import MuteButton from "@/components/MuteButton";
+
+const USER_MUTE_PREFERENCE_KEY = 'userMutePreference';
 
 const AUDIO_PROGRAMMER_TITLE = "Audio Programmer";
 const CREATIVE_LEAD_TITLE = "Creative Lead";
@@ -100,6 +103,10 @@ export default function Home() {
     'text-glow-style-4',
     'text-glow-style-5',
   ];
+
+  const [isMobile, setIsMobile] = useState(false);
+  const initialMobileLoadRef = useRef(true); // To track if auto-start has occurred
+  const [isMuted, setIsMuted] = useState(false); // State for mute status
 
   const generateGlitchedText = (text: string, intensity: number = 0.7) => {
     const chars = "!<>-_\\\\/[]{}—=+*^?#"; // Escaped backslash for regex and string literal
@@ -604,9 +611,10 @@ export default function Home() {
   }, [displayedTitle, gameDesignerPaused]); // startGlitchSequence is omitted as it's not memoized; logic relies on other deps.
 
   const handleMouseEnter = () => {
-    // If a winner message is currently being displayed for the Game Designer title,
-    // don't interrupt it by starting a new glitch sequence.
-    // The winner message has its own timeout to transition.
+    if (isMobile) {
+      return; // On mobile, animations auto-start and run; mouse enter does nothing extra.
+    }
+    // Original desktop logic for mouse enter:
     if (showWinnerMessage && PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE) {
       return;
     }
@@ -614,53 +622,41 @@ export default function Home() {
   };
 
   const handleMouseLeave = () => {
-    // If the Game Designer game was won and the winner message is currently showing,
-    // we want to preserve its display and the timeout that will transition away from it.
-    // We should only clear other incidental animation timers.
+    if (isMobile) {
+      return; // On mobile, animations auto-start and run; mouse leave does not stop them.
+    }
+    // Original desktop logic for mouse leave:
     if (PROFESSIONAL_TITLES[activeTitleIndexRef.current] === GAME_DESIGNER_TITLE && showWinnerMessage) {
       if (glitchEffectIntervalRef.current) {
         clearInterval(glitchEffectIntervalRef.current);
         glitchEffectIntervalRef.current = null;
       }
-      clearLetterAnimationTimeouts(); // Stop any Audio Programmer letter punches
-      clearCreativeLeadAnimationTimeouts(); // Stop any Creative Lead color cycling
-      
-      // DO NOT call cleanUpTimers() here as it would clear nextTitleTimeoutRef.
-      // DO NOT reset displayedTitle or other Game Designer specific states here.
-      return; // Exit early to let the winner sequence complete.
+      clearLetterAnimationTimeouts();
+      clearCreativeLeadAnimationTimeouts();
+      return;
     }
-
-    // Standard cleanup for all other scenarios:
-    // - Mouse leave during a normal title display (not Game Designer win).
-    // - Mouse leave during an unfinished/abandoned Game Designer game.
-    // - Mouse leave during other animated titles.
-    cleanUpTimers(); // This will clear nextTitleTimeoutRef, glitchEffectIntervalRef, and all game/animation timers.
-
+    cleanUpTimers();
     const lastSettledTitle = PROFESSIONAL_TITLES[activeTitleIndexRef.current];
-    setDisplayedTitle(lastSettledTitle); // Revert to the actual settled title
+    setDisplayedTitle(lastSettledTitle);
     setIsGlowing(false);
     setCurrentGlowClass('');
     setIsLetterAnimating(false);
     setIsCreativeLeadAnimating(false);
-    // isGameDesignerAnimating will be set based on whether lastSettledTitle is GAME_DESIGNER_TITLE below.
-
-    // Reset animation states for specific titles if they were the ones settled on
     if (lastSettledTitle === AUDIO_PROGRAMMER_TITLE) {
       setAnimatedLetters(AUDIO_PROGRAMMER_TITLE.split('').map(char => ({ char, isVisible: true, hasPunched: false })));
     } else {
       setAnimatedLetters([]);
     }
-
     if (lastSettledTitle === CREATIVE_LEAD_TITLE) {
       const creativeWordLength = "Creative".length;
       setCreativeLeadLetters(CREATIVE_LEAD_TITLE.split('').map((char, index) => {
         let finalColorForLetter;
         if (index < creativeWordLength) {
-          finalColorForLetter = HARMONIOUS_PALETTE_CL[0]; // Pink
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[0];
         } else if (char === ' ') {
           finalColorForLetter = 'transparent';
         } else {
-          finalColorForLetter = HARMONIOUS_PALETTE_CL[1]; // Cyan
+          finalColorForLetter = HARMONIOUS_PALETTE_CL[1];
         }
         return {
           char,
@@ -672,34 +668,27 @@ export default function Home() {
     } else {
       setCreativeLeadLetters([]);
     }
-
     if (lastSettledTitle === GAME_DESIGNER_TITLE) {
-      // This case means the mouse left when Game Designer was the settled title,
-      // but NOT during a winner message display (due to the early return above).
-      // So, game was paused or abandoned mid-play.
-      setIsGameDesignerAnimating(true); // Keep interactive styling for Game Designer title
-      setGameDesignerPaused(true);    // Revert to paused state, ready for next interaction or auto-advance
+      setIsGameDesignerAnimating(true);
+      setGameDesignerPaused(true);
       setGameDesignerLetters(
         GAME_DESIGNER_TITLE.split('').map((char, idx) => ({
           char, id: `${char}-${idx}`, status: 'neutral' as GameLetterStatus, key: `${char}-${idx}-${Date.now()}`
         }))
-      ); // Reset letters
-      gameWonRef.current = false; // Ensure win flag is false
-      setShowWinnerMessage(false); // Ensure winner message is hidden
-      // Reset game times as the game was abandoned or not completed
+      );
+      gameWonRef.current = false;
+      setShowWinnerMessage(false);
       setGameStartTime(null);
       setGameEndTime(null);
       setCurrentGameTime(0);
     } else {
-      // Settling on a title that is NOT Game Designer.
-      // Ensure all Game Designer specific states are fully reset.
       setIsGameDesignerAnimating(false);
       setGameDesignerLetters([]);
       gameWonRef.current = false;
       setGameDesignerPaused(false);
-      setShowWinnerMessage(false); 
-      setGameStartTime(null); 
-      setGameEndTime(null); 
+      setShowWinnerMessage(false);
+      setGameStartTime(null);
+      setGameEndTime(null);
       setCurrentGameTime(0);
     }
   };
@@ -814,22 +803,81 @@ export default function Home() {
     };
   }, []);
 
+  // Effect for mobile detection and initializing mute state from localStorage
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    // Initialize mute state from localStorage
+    const savedMutePreference = localStorage.getItem(USER_MUTE_PREFERENCE_KEY);
+    if (savedMutePreference !== null) {
+      const muted = JSON.parse(savedMutePreference);
+      setIsMuted(muted);
+      Howler.mute(muted);
+      console.log(`Loaded mute preference from localStorage: ${muted ? 'Muted' : 'Unmuted'}`);
+    } else {
+      // If no preference, ensure Howler matches our default state (which is unmuted)
+      Howler.mute(isMuted); // isMuted is initially false
+      console.log(`No mute preference in localStorage, default: ${isMuted ? 'Muted' : 'Unmuted'}`);
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
+  // Effect to auto-start animations on mobile
+  useEffect(() => {
+    let autoStartTimer: NodeJS.Timeout | null = null;
+    if (isMobile && initialMobileLoadRef.current) {
+      console.log("Mobile device detected, scheduling auto-start of title sequence in 3 seconds.");
+      autoStartTimer = setTimeout(() => {
+        console.log("Auto-starting title sequence now (mobile).");
+        startGlitchSequence(); 
+        initialMobileLoadRef.current = false;
+      }, 3000);
+    } else {
+      if (autoStartTimer) clearTimeout(autoStartTimer);
+    }
+    return () => {
+      if (autoStartTimer) clearTimeout(autoStartTimer);
+    };
+  }, [isMobile]); // This effect should depend on isMobile
+
+  const toggleMute = () => {
+    const newMuteState = !isMuted;
+    Howler.mute(newMuteState);
+    setIsMuted(newMuteState);
+    try {
+      localStorage.setItem(USER_MUTE_PREFERENCE_KEY, JSON.stringify(newMuteState));
+      console.log(`Saved mute preference to localStorage: ${newMuteState ? 'Muted' : 'Unmuted'}`);
+    } catch (error) {
+      console.error("Failed to save mute preference to localStorage:", error);
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-background">
+      <MuteButton isMuted={isMuted} onToggle={toggleMute} />
       {/* Hero Section */}
       <section className="w-full min-h-screen flex flex-col items-center justify-center relative bg-gradient-to-br from-purple-900 via-violet-800 to-indigo-900 text-white p-4 md:p-8">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80')] opacity-40 bg-cover bg-center mix-blend-overlay"></div>
 
         <div className="max-w-5xl mx-auto text-center z-10 space-y-6">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in">
+          <h1
+            className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-fade-in"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-400">
               Michael Straus
             </span>
             <br />
             <span 
               className={`text-white ${isGlowing && !isLetterAnimating && !isCreativeLeadAnimating && !isGameDesignerAnimating && !showWinnerMessage ? currentGlowClass : ''}`}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
               style={{ display: 'inline-block', cursor: 'default', minHeight: '1.2em' }} 
             >
               {/* Consistent positioning wrapper */}
