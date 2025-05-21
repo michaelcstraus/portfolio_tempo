@@ -81,6 +81,17 @@ export default function GameShowcase({
       tags: ["Casino", "Roulette","3D"],
       role: "As Producer and UX Designer, I led end-to-end development on Fire Roulette, including wireframes, player flow, and client communication with Fanatics. I directed R&D to integrate high-resolution 3D assets and real-time volumetric fire while keeping the game optimized for mobile web. I also was the architect of the ball control system—designing a solution that ensured accurate outcomes without sacrificing visual fidelity. Rounding out my role, I served as Music Director and created the game's complete sound design."
     },
+    { id: "game10",
+      title: "Caesars' Pick and Win Daily Rewards",
+      description:
+        "A Daily Reward System for Caesars Casino",
+      thumbnailUrl:
+        "https://images.actionnetwork.com/1200x675/blog/2025/01/Caesar-1.webp",
+      gameUrl: "https://images.actionnetwork.com/1200x675/blog/2025/01/Caesar-1.webp",
+      controls: "The player is Awarded an amount of daily picks. If the player fills a meter over the course of a week, they are awarded the prize.  There are also instant win prizes that can be won at any time.",
+      tags: ["Casino", "Reward System"],
+      role: "As Producer and UX Designer, I led end-to-end development on The Caesars' Daily Reward Bonus game, including wireframes, player flow, full stack production, integration with the Caesars API, and client communication with Caesars"
+    },
     { id: "game9",
       title: "Fanatics Multihand Blackjack with Sidebets",
       description:
@@ -154,7 +165,7 @@ export default function GameShowcase({
     },
   ],
   title = "Featured Games",
-  description = "A selection of my favorite and more innovative games I've worked on.",
+  description = "Over the course of my career I've worked on over 150 iGaming Titles. The Following is A selection of my favorite and more innovative games I've worked on.",
 }: GameShowcaseProps) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -354,7 +365,7 @@ function GameCard({ game, onPlay }: GameCardProps) {
           onClick={() => onPlay(game)}
           variant="default"
         >
-          Play Game
+          {game.id === "game10" ? "More Info" : "Play Game"}
         </Button>
       </CardFooter>
     </Card>
